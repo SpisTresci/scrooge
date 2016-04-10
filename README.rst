@@ -1,5 +1,11 @@
 SpisTresci
 ==============================
+.. image:: https://travis-ci.org/SpisTresci/SpisTresci.svg?branch=master
+     :target: https://travis-ci.org/SpisTresci/SpisTresci?branch=master
+     :alt: Build Status
+
+.. image:: https://badges.gitter.im/Join Chat.svg
+   :target: https://gitter.im/SpisTresci/SpisTresci?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge
 
 SpisTresci.pl is metasearch engine and price comparison website focusing on ebooks, audiobooks and books, which is dedicated for Polish market.
 
