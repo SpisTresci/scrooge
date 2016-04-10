@@ -1,0 +1,5 @@
+[run]
+include = spistresci/*
+omit = *migrations*, *tests*
+plugins =
+    django_coverage_plugin

@@ -1,0 +1,59 @@
+version: '2'
+services:
+  postgres:
+    build: ./compose/postgres
+    volumes:
+      - /data/spistresci/postgres:/var/lib/postgresql/data
+      - /data/spistresci/postgres-backups:/backups
+    env_file: .env
+
+  django:
+    build:
+      context: .
+      dockerfile: ./compose/django/Dockerfile
+    user: django
+    depends_on:
+      - postgres
+      - redis
+    command: /gunicorn.sh
+    env_file: .env
+    depends_on:
+      - postgres
+      - redis
+
+  nginx:
+    build: ./compose/nginx
+    depends_on:
+      - django
+    ports:
+      - "0.0.0.0:80:80"
+
+  redis:
+    image: redis:3.0
+  
+  celeryworker:
+    build:
+      context: .
+    user: django
+    env_file: .env
+    depends_on:
+     - postgres
+     - redis
+    command: celery -A spistresci.taskapp worker -l INFO
+    depends_on:
+      - postgres
+      - redis
+
+  celerybeat:
+    build:
+      context: .
+    user: django
+    env_file: .env
+    depends_on:
+      - postgres
+      - redis
+    command: celery -A spistresci.taskapp beat -l INFO
+    depends_on:
+      - postgres
+      - redis
+  
