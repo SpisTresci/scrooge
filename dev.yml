@@ -25,6 +25,7 @@ services:
       - "8000:8000"
     links:
       - postgres
+      - mailhog
 
   pycharm:
     build:
@@ -39,3 +40,7 @@ services:
     links:
       - postgres
 
+  mailhog:
+    image: mailhog/mailhog
+    ports:
+      - "8025:8025"
