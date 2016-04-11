@@ -10,7 +10,6 @@ services:
   django:
     build:
       context: .
-      dockerfile: ./compose/django/Dockerfile
     user: django
     depends_on:
       - postgres
@@ -30,7 +29,7 @@ services:
 
   redis:
     image: redis:3.0
-  
+
   celeryworker:
     build:
       context: .
@@ -56,4 +55,3 @@ services:
     depends_on:
       - postgres
       - redis
-  
