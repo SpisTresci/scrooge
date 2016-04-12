@@ -17,16 +17,13 @@ services:
       - redis
     command: /gunicorn.sh
     env_file: ../.env
-    depends_on:
-      - postgres
-      - redis
 
   nginx:
     build: ./nginx
     depends_on:
       - django
-    ports:
-      - "0.0.0.0:80:80"
+    environment:
+      - VIRTUAL_HOST=spistresci.pl
 
   redis:
     image: redis:3.0
@@ -40,9 +37,6 @@ services:
      - postgres
      - redis
     command: celery -A spistresci.taskapp worker -l INFO
-    depends_on:
-      - postgres
-      - redis
 
   celerybeat:
     build:
@@ -53,6 +47,3 @@ services:
       - postgres
       - redis
     command: celery -A spistresci.taskapp beat -l INFO
-    depends_on:
-      - postgres
-      - redis
