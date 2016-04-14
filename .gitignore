@@ -70,3 +70,6 @@ spistresci/media/
 
 # Hitch directory
 tests/.hitch
+
+# Config file for stores module
+stores.yml
