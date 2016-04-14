@@ -6,13 +6,13 @@ stores:
   store_foo:
     name: Foo
     url: http://foo.com/
-    database:
+    data_source:
       type: single_xml
       url: http://foo.com/xml/xml
 
   store_bar:
     name: bar
     url: http://bar.org/
-    database:
+    data_source:
       type: zipped_xmls
       url: http://bar.org/products.zip
