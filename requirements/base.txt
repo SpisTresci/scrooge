@@ -48,3 +48,5 @@ celery==3.1.21
 
 
 # Your custom requirements go here
+django-docopt-command==0.2.2
+PyYAML==3.11

@@ -44,6 +44,8 @@ THIRD_PARTY_APPS = (
 # Apps specific for this project go here.
 LOCAL_APPS = (
     'spistresci.users',  # custom users app
+    'spistresci.products',
+    'spistresci.stores',
     # Your stuff: custom apps go here
 )
 
@@ -237,3 +239,7 @@ BROKER_URL = env("CELERY_BROKER_URL", default='django://')
 ADMIN_URL = r'^admin/'
 
 # Your common stuff: Below this line define 3rd party library settings
+
+ST_STORES_CONFIG = env("ST_STORES_CONFIG", default=ROOT_DIR('stores.yml'))
+ST_STORES_DATA_DIR = env("ST_STORES_DATA_DIR", default=ROOT_DIR('data'))
+
