@@ -32,23 +32,27 @@ class DataSource:
 
 class XmlDataSource(DataSource):
 
-    def fetch(self, url=None, filename=None, headers=None):
+    def fetch(self, headers=None):
+        """
+        Fetch data from url specified in __init__ and save
+        this data with data_storage_manage, from where this data
+        can be retrieved later by providing name and filename
+        """
+
         print('fetch files for {}'.format(self.name))
 
-        url = url or self.url
-        filename = filename or '{}.xml'.format(self.name.lower())
+        filename = '{}.xml'.format(self.name.lower())
 
-        request = Request(url, headers=headers or {})
+        request = Request(self.url, headers=headers or {})
         response = urlopen(request)
 
         chunk_size = 16 * 1024
-
-        with data_storage_manager(self.name, filename) as f:
+        with data_storage_manager(self.name, filename) as storage:
             while True:
                 chunk = response.read(chunk_size)
                 if not chunk:
                     break
 
-                f.write(chunk)
+                storage.write(chunk)
 
         return filename
