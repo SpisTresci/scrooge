@@ -1,7 +1,5 @@
-import os
 from urllib.request import urlopen, Request
-
-from django.conf import settings
+from spistresci.stores.utils.data_storage_manager import data_storage_manager
 
 
 class DataSource:
@@ -39,14 +37,13 @@ class XmlDataSource(DataSource):
 
         url = url or self.url
         filename = filename or '{}.xml'.format(self.name.lower())
-        filepath = os.path.join(settings.ST_STORES_DATA_DIR, filename)
 
         request = Request(url, headers=headers or {})
         response = urlopen(request)
 
         chunk_size = 16 * 1024
 
-        with open(filepath, 'wb') as f:
+        with data_storage_manager(self.name, filename) as f:
             while True:
                 chunk = response.read(chunk_size)
                 if not chunk:
