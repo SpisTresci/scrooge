@@ -1,7 +1,5 @@
-import os
 from urllib.request import urlopen, Request
-
-from django.conf import settings
+from spistresci.stores.utils.datastoragemanager import DataStorageManager
 
 
 class DataSource:
@@ -34,24 +32,28 @@ class DataSource:
 
 class XmlDataSource(DataSource):
 
-    def fetch(self, url=None, filename=None, headers=None):
+    def fetch(self, headers=None):
+        """
+        Fetch data from url specified in __init__ and save
+        this data with data_storage_manage, from where this data
+        can be retrieved later by providing name and filename
+        """
+
         print('fetch files for {}'.format(self.name))
 
-        url = url or self.url
-        filename = filename or '{}.xml'.format(self.name.lower())
-        filepath = os.path.join(settings.ST_STORES_DATA_DIR, filename)
+        filename = '{}.xml'.format(self.name.lower())
 
-        request = Request(url, headers=headers or {})
+        request = Request(self.url, headers=headers or {})
         response = urlopen(request)
 
         chunk_size = 16 * 1024
-
-        with open(filepath, 'wb') as f:
+        ds_manager = DataStorageManager(self.name)
+        with ds_manager.save(filename) as buffer:
             while True:
                 chunk = response.read(chunk_size)
                 if not chunk:
                     break
 
-                f.write(chunk)
+                buffer.write(chunk)
 
         return filename

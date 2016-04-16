@@ -10,13 +10,16 @@ class StoreManager:
     def __init__(self, stores=None):
         config = Config.get()
         stores = config['stores'].items()
-        self.__stores = [
-            self.create_data_source_instance(store_name, store_conf)
+        self.__stores = {
+            store_name: self.create_data_source_instance(store_name, store_conf)
             for store_name, store_conf in stores
-        ]
+        }
 
     def get_stores(self):
-        return self.__stores
+        return self.__stores.values()
+
+    def get_store(self, name):
+        return self.__stores[name]
 
     @staticmethod
     def create_data_source_instance(store_name, store_conf):
