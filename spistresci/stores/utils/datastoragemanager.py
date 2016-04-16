@@ -1,14 +1,14 @@
 import os
+from contextlib import contextmanager
 from datetime import datetime
 from git import Repo
 
 from django.conf import settings
 
 
-class data_storage_manager:
+class DataStorageManager:
 
-    def __init__(self, store_name, filename):
-        self.file = None
+    def __init__(self, store_name):
         self.store_name = store_name
         self.store_storage_dir = os.path.join(settings.ST_STORES_DATA_DIR, store_name)
 
@@ -18,31 +18,32 @@ class data_storage_manager:
             self.repo = Repo.init(self.store_storage_dir)
         else:
             self.repo = Repo(self.store_storage_dir)
+            self.__asert_is_clean()
 
-        self.filepath = os.path.join(self.store_storage_dir, filename)
+    @contextmanager
+    def save(self, filename):
+        self.__asert_is_clean()
+        filepath = os.path.join(self.store_storage_dir, filename)
 
-    def __enter__(self):
-        self.file = open(self.filepath, 'wb')
-        return self.file
+        file = open(filepath, 'wb')
+        yield file
 
-    def __exit__(self, type, value, traceback):
-        self.file.close()
-
-        self.repo.index.add([self.filepath])
+        file.close()
+        self.repo.index.add([filepath])
 
         commit_date = datetime.now()
         commit_datetime_str = commit_date.strftime("%Y-%m-%d %H:%M:%S")
         commit_msg = "Store: {}\nDate: {}".format(self.store_name, commit_datetime_str)
 
         self.repo.index.commit(commit_msg)
-        self.repo.create_tag(commit_date.strftime('%Y-%m-%d'))
 
     def get(self, filename):
-        # if self.repo.is_dirty():
-        #     self.repo.git.reset('--hard', 'master')
-
-        self.repo.heads.master.checkout()
+        self.__asert_is_clean()
 
         filepath = os.path.join(self.store_storage_dir, filename)
         with open(filepath) as f:
             return f.read()
+
+    def __asert_is_clean(self):
+        assert not self.repo.is_dirty(), "Repository '{}' is dirty. " \
+            "Has to be cleaned up before further work.".format(self.store_storage_dir)

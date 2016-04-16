@@ -1,5 +1,5 @@
 from urllib.request import urlopen, Request
-from spistresci.stores.utils.data_storage_manager import data_storage_manager
+from spistresci.stores.utils.datastoragemanager import DataStorageManager
 
 
 class DataSource:
@@ -47,12 +47,13 @@ class XmlDataSource(DataSource):
         response = urlopen(request)
 
         chunk_size = 16 * 1024
-        with data_storage_manager(self.name, filename) as storage:
+        ds_manager = DataStorageManager(self.name)
+        with ds_manager.save(filename) as buffer:
             while True:
                 chunk = response.read(chunk_size)
                 if not chunk:
                     break
 
-                storage.write(chunk)
+                buffer.write(chunk)
 
         return filename

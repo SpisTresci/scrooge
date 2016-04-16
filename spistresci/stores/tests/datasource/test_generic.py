@@ -18,22 +18,16 @@ class TestXmlDataSource(TestCase):
     def test_data_source_is_instance_of_XmlDataSource(self):
         self.assertIsInstance(self.data_source, XmlDataSource)
 
-    @patch('spistresci.stores.datasource.generic.data_storage_manager')
+    @patch('spistresci.stores.datasource.generic.DataStorageManager')
     @patch('spistresci.stores.datasource.generic.urlopen')
     def test_fetch_and_save_data_to_storage_manager(self, urlopen, data_storage_manager):
-        # mocking request
         mocked_response = Mock()
         mocked_response.read.side_effect = [b'data1', b'data1', None]
         urlopen.return_value = mocked_response
 
-        # mocking storage_manager
-        filemock = Mock()
-        filemock.write = Mock()
-        ctx_manager = MagicMock()
-        ctx_manager.__enter__.return_value = filemock
-        data_storage_manager.return_value = ctx_manager
+        data_storage_manager.return_value.save = MagicMock()
 
         self.data_source.fetch()
 
-        data_storage_manager.assert_has_calls([call('Foo', 'foo.xml')])
-        self.assertListEqual(filemock.write.call_args_list, [call(b'data1'), call(b'data1')])
+        data_storage_manager.assert_has_calls([call('Foo')])
+        data_storage_manager.return_value.save.assert_has_calls([call('foo.xml')])
