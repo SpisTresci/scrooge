@@ -1,5 +1,7 @@
 from django_docopt_command import DocOptCommand
 
+from spistresci.stores.manager import StoreManager
+
 
 class Command(DocOptCommand):
     docs = '''Usage:
@@ -7,5 +9,8 @@ class Command(DocOptCommand):
     update_store_products --all
     '''
 
-    def handle_docopt(self, aruments):
-        pass
+    def handle_docopt(self, arguments):
+        manager = StoreManager(stores=arguments['<store_name>'] if not arguments['--all'] else None)
+
+        for store in manager.get_stores():
+            store.update()
