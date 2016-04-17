@@ -46,6 +46,7 @@ class DataStorageManager:
         commit_msg = "Store: {}\nDate: {}".format(self.store_name, commit_datetime_str)
 
         self.repo.index.commit(commit_msg)
+
         self.__increment_revision()
 
     def get(self, filename, revision=None):
@@ -63,7 +64,10 @@ class DataStorageManager:
             raise DataStorageManager.NoFile()
 
         with open(file_path) as f:
-            return f.read()
+            content = f.read()
+
+        self.repo.git.checkout('master')
+        return content
 
     def __asert_is_clean(self):
         assert not self.repo.is_dirty(), "Repository '{}' is dirty. " \

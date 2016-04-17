@@ -40,12 +40,13 @@ class TestDataStorageManager(TestCase):
                 ds_manager.get('file.xml')
 
     def test_get_raises_no_revision_for_not_existing_revision(self):
-        ds_manager = DataStorageManager(self._func_name())
-        with ds_manager.save('file.xml') as buffer:
-            buffer.write(b'data part 1')
+        with override_settings(ST_STORES_DATA_DIR=self.temp_dir.name):
+            ds_manager = DataStorageManager(self._func_name())
+            with ds_manager.save('file.xml') as buffer:
+                buffer.write(b'data part 1')
 
-        with self.assertRaises(DataStorageManager.NoRevision):
-            ds_manager.get('file.xml', revision=999)
+            with self.assertRaises(DataStorageManager.NoRevision):
+                ds_manager.get('file.xml', revision=999)
 
     def test_get_raises_no_file_when_there_is_no_file(self):
         with override_settings(ST_STORES_DATA_DIR=self.temp_dir.name):

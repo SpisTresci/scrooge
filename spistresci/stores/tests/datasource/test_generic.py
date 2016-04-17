@@ -13,10 +13,10 @@ class TestXmlDataSource(TestCase):
 
     def setUp(self):
         Config.read()
-        self.data_source = StoreManager().get_store('xmldatasource')
 
     def test_data_source_is_instance_of_XmlDataSource(self):
-        self.assertIsInstance(self.data_source, XmlDataSource)
+        data_source = StoreManager().get_store('xmldatasource')
+        self.assertIsInstance(data_source, XmlDataSource)
 
     @patch('spistresci.stores.datasource.generic.DataStorageManager')
     @patch('spistresci.stores.datasource.generic.urlopen')
@@ -27,7 +27,8 @@ class TestXmlDataSource(TestCase):
 
         data_storage_manager.return_value.save = MagicMock()
 
-        self.data_source.fetch()
+        data_source = StoreManager().get_store('xmldatasource')
+        data_source.fetch()
 
         data_storage_manager.assert_has_calls([call('Foo')])
         data_storage_manager.return_value.save.assert_has_calls([call('foo.xml')])
