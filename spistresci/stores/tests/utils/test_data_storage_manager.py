@@ -33,56 +33,74 @@ class TestDataStorageManager(TestCase):
 
         self.assertEqual(content, 'data part 1data part 2')
 
-    def test_last_revision_number_is_0_at_the_beginning(self):
+    def test_get_raises_no_revision_at_the_beginning(self):
         with override_settings(ST_STORES_DATA_DIR=self.temp_dir.name):
             ds_manager = DataStorageManager(self._func_name())
-            self.assertEqual(ds_manager.last_revision_number(), 0)
+            with self.assertRaises(DataStorageManager.NoRevision):
+                ds_manager.get('file.xml')
+
+    def test_get_raises_no_revision_for_not_existing_revision(self):
+        ds_manager = DataStorageManager(self._func_name())
+        with ds_manager.save('file.xml') as buffer:
+            buffer.write(b'data part 1')
+
+        with self.assertRaises(DataStorageManager.NoRevision):
+            ds_manager.get('file.xml', revision=999)
+
+    def test_get_raises_no_file_when_there_is_no_file(self):
+        with override_settings(ST_STORES_DATA_DIR=self.temp_dir.name):
+            ds_manager = DataStorageManager(self._func_name())
+            with ds_manager.save('file.xml') as buffer:
+                buffer.write(b'data part 1')
+
+            with self.assertRaises(DataStorageManager.NoFile):
+                ds_manager.get('other_file.xml')
+
+    def test_last_revision_number_raises_no_revisions_at_the_beginning(self):
+        with override_settings(ST_STORES_DATA_DIR=self.temp_dir.name):
+            ds_manager = DataStorageManager(self._func_name())
+            with self.assertRaises(DataStorageManager.NoRevision):
+                ds_manager.last_revision_number()
 
     def test_last_revision_number_increase_after_each_save(self):
         with override_settings(ST_STORES_DATA_DIR=self.temp_dir.name):
             ds_manager = DataStorageManager(self._func_name())
-            self.assertEqual(ds_manager.last_revision_number(), 0)
 
             with ds_manager.save('file.xml') as buffer:
                 buffer.write(b'data part 1')
 
-            self.assertEqual(ds_manager.last_revision_number(), 1)
+            self.assertEqual(ds_manager.last_revision_number(), DataStorageManager.FIRST_REV_NUMBER)
 
             with ds_manager.save('file.xml') as buffer:
                 buffer.write(b'data part 1')
                 buffer.write(b'data part 2')
 
-            self.assertEqual(ds_manager.last_revision_number(), 2)
+            self.assertEqual(ds_manager.last_revision_number(), DataStorageManager.FIRST_REV_NUMBER + 1)
 
     def test_last_revision_number_do_not_depend_on_filename(self):
         with override_settings(ST_STORES_DATA_DIR=self.temp_dir.name):
             ds_manager = DataStorageManager(self._func_name())
-            self.assertEqual(ds_manager.last_revision_number(), 0)
 
             with ds_manager.save('file1.xml') as buffer:
                 buffer.write(b'data part 1')
 
-            self.assertEqual(ds_manager.last_revision_number(), 1)
+            self.assertEqual(ds_manager.last_revision_number(), DataStorageManager.FIRST_REV_NUMBER)
 
             with ds_manager.save('file2.xml') as buffer:
                 buffer.write(b'data part 1')
 
-            self.assertEqual(ds_manager.last_revision_number(), 2)
+            self.assertEqual(ds_manager.last_revision_number(), DataStorageManager.FIRST_REV_NUMBER + 1)
 
     def test_last_revision_number_do_not_depend_on_store_name(self):
         with override_settings(ST_STORES_DATA_DIR=self.temp_dir.name):
             ds_manager = DataStorageManager(self._func_name() + '1')
-            self.assertEqual(ds_manager.last_revision_number(), 0)
-
             with ds_manager.save('file1.xml') as buffer:
                 buffer.write(b'data part 1')
 
-            self.assertEqual(ds_manager.last_revision_number(), 1)
+            self.assertEqual(ds_manager.last_revision_number(), DataStorageManager.FIRST_REV_NUMBER)
 
             ds_manager = DataStorageManager(self._func_name() + '2')
-            self.assertEqual(ds_manager.last_revision_number(), 0)
-
             with ds_manager.save('file1.xml') as buffer:
                 buffer.write(b'data part 1')
 
-            self.assertEqual(ds_manager.last_revision_number(), 1)
+            self.assertEqual(ds_manager.last_revision_number(), DataStorageManager.FIRST_REV_NUMBER)
