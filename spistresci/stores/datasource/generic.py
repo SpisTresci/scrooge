@@ -1,6 +1,8 @@
 import re
 from lxml import etree
 from urllib.request import urlopen, Request
+
+from spistresci.stores.models import Store
 from spistresci.stores.utils.datastoragemanager import DataStorageManager
 
 
@@ -8,6 +10,7 @@ class DataSource:
 
     def __init__(self, store_config):
         self.name = store_config['name']
+        self.store_url = store_config['url']
         self.url = store_config['data_source']['url']
         self.type = store_config['data_source']['type']
         self.ds_manager = DataStorageManager(self.name)
@@ -48,8 +51,9 @@ class DataSource:
         3. submit - insert/delete/update products in database
 
         """
-
-        self._submit(**self._filter(**self._extract()))
+        store = Store.objects.get(name=self.name, url=self.store_url)
+        if store.last_update_revision < self.ds_manager.last_revision_number():
+            self._submit(**self._filter(**self._extract()))
 
 
 class XmlDataSource(DataSource):
@@ -100,7 +104,7 @@ class XmlDataSource(DataSource):
 
         if revision_number == DataStorageManager.FIRST_REV_NUMBER:
             # because this is first revision, all products are new
-            return {'added': products, 'deleted': [], 'modified': []}
+            return {'revision_number': revision_number, 'added': products, 'deleted': [], 'modified': []}
 
         prev_rev_number = revision_number - 1
 
@@ -131,16 +135,15 @@ class XmlDataSource(DataSource):
         ]
 
         return {
+            'revision_number': revision_number,
             'added': products_added,
             'deleted': products_deleted,
             'modified': products_modified,
         }
 
-    def _submit(self, added, deleted, modified):
-        print('To add: {}'.format(len(added)))
-        print('To delete: {}'.format(len(deleted)))
-        print('To modify: {}'.format(len(modified)))
-        pass
+    def _submit(self, revision_number, added, deleted, modified):
+        store, new = Store.objects.get_or_create(name=self.name, url=self.store_url)
+        store.update_products(revision_number, added, deleted, modified)
 
     # code below is inherited from SpisTresci 1.0. Refactor is welcome :)
 
