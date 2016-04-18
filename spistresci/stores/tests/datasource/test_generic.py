@@ -49,10 +49,20 @@ class TestXmlDataSource(TestCase):
 
         last_revision_number.return_value = 43
         data_source.update()
-        update_products.assert_called_once_with(43, [], [], [])
+        update_products.assert_called_once_with(revision_number=43, added=[], deleted=[], modified=[])
 
-    # def test_update_creates_store_if_it_does_not_exist(self):
-    #     self.assertEqual(Store.objects.count(), 0)
-    #     data_source = StoreManager().get_store('xmldatasource')
-    #     data_source.update()
-    #     self.assertEqual(Store.objects.count(), 1)
+    @patch('spistresci.stores.datasource.generic.Store.update_products')
+    @patch('spistresci.stores.datasource.generic.DataStorageManager.get')
+    @patch('spistresci.stores.datasource.generic.DataStorageManager.last_revision_number')
+    def test_update_creates_store_if_it_does_not_exist(self, last_revision_number, get, update_products):
+        self.assertEqual(Store.objects.count(), 0)
+
+        get.return_value = '<products></products>'
+        last_revision_number.return_value = 0
+
+        data_source = StoreManager().get_store('xmldatasource')
+        data_source.update()
+        self.assertEqual(Store.objects.count(), 1)
+
+    # def test_update_raises_no_revision_exception_if_there_is_no_data_in_ds(self):
+    #     pass

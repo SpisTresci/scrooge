@@ -41,19 +41,21 @@ class DataSource:
     def _filter(self, *args, **kwargs):
         pass
 
-    def _submit(self, *args, **kwargs):
-        pass
-
-    def update(self):
+    def update(self, full_update=False):
         """
         1. extract - get data from raw source (i.e. parse json/xml and convert to dict)
         2. filter - filter out only those items which need to be updated
         3. submit - insert/delete/update products in database
 
         """
-        store = Store.objects.get(name=self.name, url=self.store_url)
-        if store.last_update_revision < self.ds_manager.last_revision_number():
-            self._submit(**self._filter(**self._extract()))
+
+        store, new = Store.objects.get_or_create(name=self.name, url=self.store_url)
+        revision_in_ds = self.ds_manager.last_revision_number()
+        if new:
+            extracted = self._extract()
+            store.update_products(revision_number=revision_in_ds, added=extracted['products'], deleted=[], modified=[])
+        elif store.last_update_revision < revision_in_ds:
+            store.update_products(**self._filter(**self._extract()))
 
 
 class XmlDataSource(DataSource):
@@ -140,10 +142,6 @@ class XmlDataSource(DataSource):
             'deleted': products_deleted,
             'modified': products_modified,
         }
-
-    def _submit(self, revision_number, added, deleted, modified):
-        store, new = Store.objects.get_or_create(name=self.name, url=self.store_url)
-        store.update_products(revision_number, added, deleted, modified)
 
     # code below is inherited from SpisTresci 1.0. Refactor is welcome :)
 
