@@ -9,5 +9,7 @@ class Store(models.Model):
     url = models.URLField(_('Store url address'))
     last_update_revision = models.IntegerField(null=True)
 
-    def update_products(self, revision, added, deleted, modified):
-        pass
+    def update_products(self, revision, added=None, deleted=None, modified=None):
+        added = added or []
+        deleted = deleted or []
+        modified = modified or []

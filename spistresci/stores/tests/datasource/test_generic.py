@@ -7,6 +7,7 @@ from spistresci.stores.config import Config
 from spistresci.stores.datasource.generic import XmlDataSource
 from spistresci.stores.manager import StoreManager
 from spistresci.stores.models import Store
+from spistresci.stores.utils.datastoragemanager import DataStorageManager
 
 
 @override_settings(ST_STORES_CONFIG='spistresci/stores/tests/datasource/configs/test_xmldatasource.yml')
@@ -64,5 +65,7 @@ class TestXmlDataSource(TestCase):
         data_source.update()
         self.assertEqual(Store.objects.count(), 1)
 
-    # def test_update_raises_no_revision_exception_if_there_is_no_data_in_ds(self):
-    #     pass
+    def test_update_raises_no_revision_exception_if_there_is_no_data_in_ds(self):
+        data_source = StoreManager().get_store('xmldatasource')
+        with self.assertRaises(DataStorageManager.NoRevision):
+            data_source.update()

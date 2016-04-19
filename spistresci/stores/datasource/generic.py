@@ -41,21 +41,22 @@ class DataSource:
     def _filter(self, *args, **kwargs):
         pass
 
-    def update(self, full_update=False):
-        """
-        1. extract - get data from raw source (i.e. parse json/xml and convert to dict)
-        2. filter - filter out only those items which need to be updated
-        3. submit - insert/delete/update products in database
-
-        """
-
+    def update(self):
+        available_revision = self.ds_manager.last_revision_number()
         store, new = Store.objects.get_or_create(name=self.name, url=self.store_url)
-        revision_in_ds = self.ds_manager.last_revision_number()
+
         if new:
-            extracted = self._extract()
-            store.update_products(revision_number=revision_in_ds, added=extracted['products'], deleted=[], modified=[])
-        elif store.last_update_revision < revision_in_ds:
-            store.update_products(**self._filter(**self._extract()))
+            products = self._extract(available_revision)
+            store.update_products(revision_number=available_revision, added=products)
+        elif store.last_update_revision < available_revision:
+            products = self._extract(available_revision)
+            filtered = self._filter(products, store.last_update_revision)
+            store.update_products(
+                revision_number=available_revision,
+                added=filtered['added'],
+                deleted=filtered['deleted'],
+                modified=filtered['modified']
+            )
 
 
 class XmlDataSource(DataSource):
@@ -85,33 +86,21 @@ class XmlDataSource(DataSource):
 
         return filename
 
-    def _extract(self, *args, **kwargs):
+    def _extract(self, revision):
 
         file_name = '{}.xml'.format(self.name.lower())
-        revision_number = self.ds_manager.last_revision_number()
-        file_content = self.ds_manager.get(file_name, revision=revision_number)
+        file_content = self.ds_manager.get(file_name, revision)
 
         products = [
             self._make_dict(product_xml_node)
             for product_xml_node in self._get_product_list(file_content)
         ]
 
-        return {
-            'revision_number': revision_number,
-            'file_name': file_name,
-            'products': products,
-        }
+        return products
 
-    def _filter(self, revision_number, file_name, products):
-
-        if revision_number == DataStorageManager.FIRST_REV_NUMBER:
-            # because this is first revision, all products are new
-            return {'revision_number': revision_number, 'added': products, 'deleted': [], 'modified': []}
-
-        prev_rev_number = revision_number - 1
-
+    def _filter(self, products, prev_rev_number):
         new_product_dicts = {product['external_id']: product for product in products}
-
+        file_name = '{}.xml'.format(self.name.lower())
         file_content = self.ds_manager.get(file_name, prev_rev_number)
 
         old_products = [
@@ -137,7 +126,6 @@ class XmlDataSource(DataSource):
         ]
 
         return {
-            'revision_number': revision_number,
             'added': products_added,
             'deleted': products_deleted,
             'modified': products_modified,
