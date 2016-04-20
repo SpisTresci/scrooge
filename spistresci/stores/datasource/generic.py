@@ -35,10 +35,10 @@ class DataSource:
     def fetch(self):
         pass
 
-    def _extract(self, *args, **kwargs):
+    def _extract(self, revision):
         pass
 
-    def _filter(self, *args, **kwargs):
+    def _filter(self, products, prev_rev_number):
         pass
 
     def update(self):
