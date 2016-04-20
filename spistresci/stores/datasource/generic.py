@@ -120,7 +120,7 @@ class XmlDataSource(DataSource):
         ]
 
         products_modified = [
-            old_product_dicts[key]
+            new_product_dicts[key]
             for key in set(old_product_dicts.keys()).intersection(set(new_product_dicts.keys()))
             if old_product_dicts[key] != new_product_dicts[key]
         ]
