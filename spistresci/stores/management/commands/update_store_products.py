@@ -8,10 +8,16 @@ class Command(DocOptCommand):
     docs = '''Usage:
     update_store_products <store_name>...
     update_store_products --all
+
+    Options:
+      -a --all     Updates all stores configured in config
     '''
 
     def handle_docopt(self, arguments):
-        manager = StoreManager(stores=arguments['<store_name>'] if not arguments['--all'] else None)
+        try:
+            manager = StoreManager(store_names=arguments['<store_name>'] if not arguments['--all'] else None)
+        except StoreManager.MissingStoreInStoresConfigException as e:
+            exit(e.args[0])
 
         for store in manager.get_stores():
             try:

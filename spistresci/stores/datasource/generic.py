@@ -1,9 +1,12 @@
+import logging
 import re
 from lxml import etree
 from urllib.request import urlopen, Request
 
 from spistresci.stores.models import Store
 from spistresci.stores.utils.datastoragemanager import DataStorageManager
+
+logger = logging.getLogger(__name__)
 
 
 class DataSource:
@@ -45,7 +48,7 @@ class DataSource:
         available_revision = self.ds_manager.last_revision_number()
         store, new = Store.objects.get_or_create(name=self.name, url=self.store_url)
 
-        if new:
+        if new or store.last_update_revision is None:
             products = self._extract(available_revision)
             store.update_products(revision_number=available_revision, added=products)
         elif store.last_update_revision < available_revision:
@@ -68,7 +71,7 @@ class XmlDataSource(DataSource):
         can be retrieved later by providing name and filename
         """
 
-        print('fetch files for {}'.format(self.name))
+        logger.info('fetch files for {}'.format(self.name))
 
         filename = '{}.xml'.format(self.name.lower())
 
