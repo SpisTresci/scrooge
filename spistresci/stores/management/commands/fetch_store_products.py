@@ -12,7 +12,10 @@ class Command(DocOptCommand):
     '''
 
     def handle_docopt(self, arguments):
-        manager = StoreManager(store_names=arguments['<store_name>'] if not arguments['--all'] else None)
+        try:
+            manager = StoreManager(store_names=arguments['<store_name>'] if not arguments['--all'] else None)
+        except StoreManager.MissingStoreInStoresConfigException as e:
+            exit(e.args[0])
 
         for store in manager.get_stores():
             store.fetch()
