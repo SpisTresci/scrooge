@@ -51,3 +51,4 @@ celery==3.1.21
 django-docopt-command==0.2.2
 PyYAML==3.11
 GitPython==1.0.2
+lxml==3.6.0

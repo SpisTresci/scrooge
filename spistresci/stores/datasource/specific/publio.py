@@ -2,4 +2,16 @@ from spistresci.stores.datasource.generic import XmlDataSource
 
 
 class Publio(XmlDataSource):
-    pass
+    xml_tag_dict = {
+        'external_id': ('./id', ''),
+        'title': ('./title', ''),
+        'authors': ('./authors', ''),
+        'formats': ('./formats', ''),
+        'protection': ('./protectionType', ''),
+        'price': ('./price', ''),
+        'url': ('./productUrl', ''),
+        'cover': ('./imageUrl', ''),
+        'isbns': ('./isbns', ''),
+        'publisher': ('./company', ''),
+        'category': ('./categories/category', ''),
+    }

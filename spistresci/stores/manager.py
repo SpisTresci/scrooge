@@ -1,3 +1,5 @@
+from django.conf import settings
+
 from spistresci.stores.config import Config
 from spistresci.stores.datasource.generic import DataSource
 
@@ -7,13 +9,25 @@ from spistresci.stores.datasource.specific import *
 
 
 class StoreManager:
-    def __init__(self, stores=None):
-        config = Config.get()
-        stores = config['stores'].items()
-        self.__stores = {
-            store_name: self.create_data_source_instance(store_name, store_conf)
-            for store_name, store_conf in stores
-        }
+
+    class MissingStoreInStoresConfigException(Exception):
+        def __init__(self, store_name):
+            Exception.__init__(
+                self,
+                "There is no '{}' store defined in '{}'.\n"
+                "You can use different config by specifying its location "
+                "by ST_STORES_CONFIG environment variable.".format(store_name, settings.ST_STORES_CONFIG)
+            )
+
+    def __init__(self, store_names=None):
+        stores = Config.get()['stores']
+
+        try:
+            stores = stores if not store_names else {name: stores[name] for name in store_names}
+        except KeyError as e:
+            raise StoreManager.MissingStoreInStoresConfigException(e.args[0])
+
+        self.__stores = {name: self.create_data_source_instance(name, conf) for name, conf in stores.items()}
 
     def get_stores(self):
         return self.__stores.values()
