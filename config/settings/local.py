@@ -107,7 +107,16 @@ INSTALLED_APPS += ('django_extensions', )
 
 # TESTING
 # ------------------------------------------------------------------------------
-TEST_RUNNER = 'django.test.runner.DiscoverRunner'
+import logging
+from django.test.runner import DiscoverRunner
+
+
+class NoLoggingTestRunner(DiscoverRunner):
+    def run_tests(self, test_labels, extra_tests=None, **kwargs):
+        logging.disable(logging.CRITICAL)  # disable logging below CRITICAL while testing
+        return super(NoLoggingTestRunner, self).run_tests(test_labels, extra_tests, **kwargs)
+
+TEST_RUNNER = 'config.settings.local.NoLoggingTestRunner'
 
 ########## CELERY
 # In development, all tasks will be executed locally by blocking until the task returns
