@@ -1,7 +1,11 @@
+import logging
+
 from django_docopt_command import DocOptCommand
 
 from spistresci.stores.manager import StoreManager
 from spistresci.stores.utils.datastoragemanager import DataStorageManager
+
+logger = logging.getLogger(__name__)
 
 
 class Command(DocOptCommand):
@@ -23,4 +27,4 @@ class Command(DocOptCommand):
             try:
                 store.update()
             except DataStorageManager.NoRevision:
-                print('WARNING: {} cannot be updated. There is no fetched data for it.'.format(store.name))
+                logger.warn('{} cannot be updated. There is no fetched data for it.'.format(store.name))

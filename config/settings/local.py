@@ -36,6 +36,57 @@ CACHES = {
     }
 }
 
+# LOGGING
+# ------------------------------------------------------------------------------
+LOGGING = {
+    'version': 1,
+    'root': {
+        'level': 'DEBUG',
+        'handlers': ['console'],
+    },
+    'formatters': {
+        'verbose': {
+            'format': '%(levelname)-8s %(asctime)s %(module)s '
+                      '%(process)d %(thread)d %(message)s'
+        },
+        'simple': {
+            '()': 'colorlog.ColoredFormatter',
+            'format': '%(bold_white)s[%(asctime)s]%(log_color)s %(levelname)-8s%(reset)s %(message)s',
+            'log_colors': {
+                'DEBUG': 'cyan',
+                'INFO': 'green',
+                'WARNING': 'yellow',
+                'ERROR': 'red',
+                'CRITICAL': 'red,bg_white',
+            },
+            'datefmt': '%H:%M:%S'
+        },
+    },
+    'handlers': {
+        'console': {
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler',
+            'formatter': 'simple'
+        },
+        'st_logfile': {
+            'level': 'INFO',
+            'class': 'logging.handlers.TimedRotatingFileHandler',
+            'filename': LOGS_DIR("spistresci.log"),
+            'when': 'd',
+            'formatter': 'verbose',
+            'interval': 1,
+            'backupCount': 7,
+        }
+    },
+    'loggers': {
+        'spistresci': {
+            'level': 'DEBUG',
+            'handlers': ['console', 'st_logfile'],
+            'propagate': False,
+        }
+    },
+}
+
 # django-debug-toolbar
 # ------------------------------------------------------------------------------
 MIDDLEWARE_CLASSES += ('debug_toolbar.middleware.DebugToolbarMiddleware',)
@@ -56,7 +107,16 @@ INSTALLED_APPS += ('django_extensions', )
 
 # TESTING
 # ------------------------------------------------------------------------------
-TEST_RUNNER = 'django.test.runner.DiscoverRunner'
+import logging
+from django.test.runner import DiscoverRunner
+
+
+class NoLoggingTestRunner(DiscoverRunner):
+    def run_tests(self, test_labels, extra_tests=None, **kwargs):
+        logging.disable(logging.CRITICAL)  # disable logging below CRITICAL while testing
+        return super(NoLoggingTestRunner, self).run_tests(test_labels, extra_tests, **kwargs)
+
+TEST_RUNNER = 'config.settings.local.NoLoggingTestRunner'
 
 ########## CELERY
 # In development, all tasks will be executed locally by blocking until the task returns

@@ -156,7 +156,8 @@ CACHES = {
     }
 }
 
-
+# LOGGING
+# ------------------------------------------------------------------------------
 # Sentry Configuration
 SENTRY_DSN = env('DJANGO_SENTRY_DSN')
 SENTRY_CLIENT = env('DJANGO_SENTRY_CLIENT', default='raven.contrib.django.raven_compat.DjangoClient')
@@ -169,7 +170,7 @@ LOGGING = {
     },
     'formatters': {
         'verbose': {
-            'format': '%(levelname)s %(asctime)s %(module)s '
+            'format': '%(levelname)-8s %(asctime)s %(module)s '
                       '%(process)d %(thread)d %(message)s'
         },
     },
@@ -182,6 +183,15 @@ LOGGING = {
             'level': 'DEBUG',
             'class': 'logging.StreamHandler',
             'formatter': 'verbose'
+        },
+        'st_logfile': {
+            'level': 'INFO',
+            'class': 'logging.handlers.TimedRotatingFileHandler',
+            'filename': LOGS_DIR("spistresci.log"),
+            'when': 'midnight',
+            'formatter': 'verbose',
+            'interval': 1,
+            'backupCount': 14,
         }
     },
     'loggers': {
@@ -205,6 +215,11 @@ LOGGING = {
             'handlers': ['console', 'sentry'],
             'propagate': False,
         },
+        'spistresci': {
+            'level': 'INFO',
+            'handlers': ['console', 'st_logfile'],
+            'propagate': False,
+        }
     },
 }
 SENTRY_CELERY_LOGLEVEL = env.int('DJANGO_SENTRY_LOG_LEVEL', logging.INFO)
