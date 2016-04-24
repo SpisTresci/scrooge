@@ -45,6 +45,7 @@ class DataSource:
         pass
 
     def update(self):
+        logger.info('Updating {} products...'.format(self.name))
         available_revision = self.ds_manager.last_revision_number()
         store, new = Store.objects.get_or_create(name=self.name, url=self.store_url)
 
@@ -71,7 +72,7 @@ class XmlDataSource(DataSource):
         can be retrieved later by providing name and filename
         """
 
-        logger.info('fetch files for {}'.format(self.name))
+        logger.info('Fetching data for {}...'.format(self.name))
 
         filename = '{}.xml'.format(self.name.lower())
 
