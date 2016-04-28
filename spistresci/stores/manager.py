@@ -19,6 +19,18 @@ class StoreManager:
                 "by ST_STORES_CONFIG environment variable.".format(store_name, settings.ST_STORES_CONFIG)
             )
 
+    class MissingStoreDataSourceImplementationException(Exception):
+        def __init__(self, store_name):
+            Exception.__init__(
+                self,
+                "There is no 'class {}(DataSource)' defined in '{}'. "
+                "You should provide it. Instead DataSource as base class "
+                "you can use generic class like XmlDataSource or similar.".format(
+                    store_name,
+                    settings.APPS_DIR('stores/datasource/specific/')
+                )
+            )
+
     def __init__(self, store_names=None):
         stores = Config.get()['stores']
 
@@ -41,4 +53,4 @@ class StoreManager:
             if subclass_name.lower() == store_name:
                 return subclass(store_conf)
         else:
-            exit("There is no 'class {}(DataSource)' defined.".format(store_name.title()))
+            raise StoreManager.MissingStoreDataSourceImplementationException(store_name.title())

@@ -19,7 +19,10 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         try:
             manager = StoreManager(store_names=options['store_names'] if not options['all'] else None)
-        except StoreManager.MissingStoreInStoresConfigException as e:
+        except (
+            StoreManager.MissingStoreInStoresConfigException,
+            StoreManager.MissingStoreDataSourceImplementationException
+        ) as e:
             exit(e.args[0])
 
         for store in manager.get_stores():

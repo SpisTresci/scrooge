@@ -52,4 +52,10 @@ django-docopt-command==0.2.2
 PyYAML==3.11
 GitPython==1.0.2
 lxml==3.6.0
-django-chroniker==0.8.5
+
+# django-chroniker==0.8.5
+# Because issues:
+# https://github.com/chrisspen/django-chroniker/issues/50
+# https://github.com/chrisspen/django-chroniker/pull/52
+# Right now we are using custom version of django-chroniker
+git+git://github.com/noisy/django-chroniker.git@st-dev-1
