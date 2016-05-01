@@ -18,8 +18,10 @@ COPY ./compose/django/entrypoint.sh /entrypoint.sh
 COPY ./compose/django/cron.sh /cron.sh
 RUN sed -i 's/\r//' /entrypoint.sh
 RUN sed -i 's/\r//' /gunicorn.sh
+RUN sed -i 's/\r//' /cron.sh
 RUN chmod +x /entrypoint.sh && chown django /entrypoint.sh
 RUN chmod +x /gunicorn.sh && chown django /gunicorn.sh
+RUN chmod +x /cron.sh && chown django /cron.sh
 
 WORKDIR /app
 
