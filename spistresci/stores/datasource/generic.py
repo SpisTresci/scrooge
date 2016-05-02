@@ -1,6 +1,6 @@
 import logging
 import re
-from lxml import etree
+from lxml import etree, objectify
 from urllib.request import urlopen, Request
 
 from spistresci.stores.models import Store
@@ -142,7 +142,8 @@ class XmlDataSource(DataSource):
     depth = 0
 
     def _get_product_list(self, file_content):
-        root = etree.fromstring(str.encode(file_content))
+        parser = objectify.makeparser(huge_tree=True)
+        root = etree.fromstring(str.encode(file_content), parser)
         return list(self._we_have_to_go_deeper(root, self.depth))
 
     def _we_have_to_go_deeper(self, root, depth):
