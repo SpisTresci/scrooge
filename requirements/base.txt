@@ -58,4 +58,4 @@ lxml==3.6.0
 # https://github.com/chrisspen/django-chroniker/issues/50
 # https://github.com/chrisspen/django-chroniker/pull/52
 # Right now we are using custom version of django-chroniker
-git+git://github.com/noisy/django-chroniker.git@st-dev-1
+git+git://github.com/SpisTresci/django-chroniker.git@st-dev-2

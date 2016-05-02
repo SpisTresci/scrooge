@@ -232,3 +232,9 @@ RAVEN_CONFIG = {
 ADMIN_URL = env('DJANGO_ADMIN_URL')
 
 # Your production stuff: Below this line define 3rd party library settings
+
+# Django-chroniker
+VIRTUAL_HOST = env('VIRTUAL_HOST').split(',')[0]
+BASE_URL = 'http://{}'.format(VIRTUAL_HOST)
+CHRONIKER_EMAIL_SENDER = 'Chroniker'
+CHRONIKER_EMAIL_HOST_USER = 'chroniker@{}'.format(VIRTUAL_HOST)
