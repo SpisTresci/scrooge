@@ -55,7 +55,8 @@ lxml==3.6.0
 
 # django-chroniker==0.8.5
 # Because issues:
-# https://github.com/chrisspen/django-chroniker/issues/50
+# https://github.com/chrisspen/django-chroniker/pull/47
 # https://github.com/chrisspen/django-chroniker/pull/52
+# https://github.com/chrisspen/django-chroniker/issues/53
 # Right now we are using custom version of django-chroniker
-git+git://github.com/SpisTresci/django-chroniker.git@st-dev-2
+git+git://github.com/SpisTresci/django-chroniker.git@st-dev-4
