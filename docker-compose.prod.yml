@@ -16,6 +16,8 @@ django:
 
 django-chroniker:
   build: .
+  volumes:
+    - /data/spistresci/app-data:/app/data/
   command: /cron.sh
   links:
     - postgres
