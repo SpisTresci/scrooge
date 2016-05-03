@@ -35,7 +35,7 @@ class StoreManager:
         stores = Config.get()['stores']
 
         try:
-            stores = stores if not store_names else {name: stores[name] for name in store_names}
+            stores = stores if not store_names else {name.lower(): stores[name.lower()] for name in store_names}
         except KeyError as e:
             raise StoreManager.MissingStoreInStoresConfigException(e.args[0])
 
