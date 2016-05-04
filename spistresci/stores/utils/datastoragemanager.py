@@ -41,14 +41,20 @@ class DataStorageManager:
         file.close()
 
         date = datetime.now()
-        if self.repo.is_dirty():
+
+        try:
+            commits_counter = len(self.repo.git.log())
+        except GitCommandError:
+            commits_counter = 0
+
+        if self.repo.is_dirty() or commits_counter == 0:
             self.repo.index.add([file_path])
             commit_datetime_str = date.strftime("%Y-%m-%d %H:%M:%S")
             commit_msg = "Store: {}\nDate: {}".format(self.store_name, commit_datetime_str)
             self.repo.index.commit(commit_msg)
 
         self.__increment_revision()
-        self.repo.create_tag("date-{}".format(date.strftime("%Y-%m-%d_%H-%M-%S")))
+        self.repo.create_tag("date-{}".format(date.strftime("%Y-%m-%d_%H-%M-%S-%f")))
 
     def get(self, filename, revision=None):
         self.__asert_is_clean()
