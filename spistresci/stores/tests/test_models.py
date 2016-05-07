@@ -70,3 +70,69 @@ class TestStore(TestCase):
         self.store.update_products(revision_number=0, deleted=products[0:2])
         self.assertEqual(Product.objects.count(), 1)
         self.assertTrue(Product.objects.filter(store=self.store, **products[2]).exists())
+
+    def test_update_products__modify_core_fields_of_products(self):
+        products = [
+            {'external_id': 1, 'title': 'some bar 1', 'url': 'http://bar.com/1', 'price': '1.99'},
+            {'external_id': 2, 'title': 'some bar 2', 'url': 'http://bar.com/2', 'price': '9.00'},
+            {'external_id': 3, 'title': 'some bar 3', 'url': 'http://bar.com/3', 'price': '5.00'},
+            {'external_id': 4, 'title': 'some bar 4', 'url': 'http://bar.com/4', 'price': '29.99'},
+        ]
+        Product.objects.bulk_create([Product(store=self.store, **product) for product in products])
+
+        products[0]['title'] += ' - 2nd edition'
+        products[1]['price'] = '18.00'
+        del products[2]['price']  # should reset to default 0
+
+        self.store.update_products(revision_number=0, modified=products[0:3])
+        self.assertEqual(Product.objects.count(), 4)
+
+        products[2]['price'] = '0.00'
+        self.assertListEqual(
+            [True]*4,
+            [Product.objects.filter(store=self.store, **product).exists() for product in products]
+        )
+
+    def test_update_products__modify_additional_fields_of_products(self):
+        core_data = [
+            {'external_id': 2, 'title': '2', 'url': 'http://bar.com/2', 'price': '9.00'},
+            {'external_id': 1, 'title': '1', 'url': 'http://bar.com/1', 'price': '1.99'},
+            {'external_id': 3, 'title': '3', 'url': 'http://bar.com/3', 'price': '5.00'},
+            {'external_id': 4, 'title': '4', 'url': 'http://bar.com/4', 'price': '29.99'},
+            {'external_id': 5, 'title': '5', 'url': 'http://bar.com/5', 'price': '0.00'},
+        ]
+
+        additional_data = [
+            {'format': 'mp3'},
+            {'size': 42},
+            {'promo_price': '3.99'},
+            {'a': 0, 'b': 1},
+            {'field': 'data'},
+
+        ]
+        Product.objects.bulk_create([
+            Product(store=self.store, **core, data=data)
+            for core, data in zip(core_data, additional_data)
+        ])
+
+        additional_data[0]['format'] = 'pdf'
+        additional_data[1]['size'] = '20x30'
+        del additional_data[2]['promo_price']
+        additional_data[3]['c'] = 2
+
+        products = [{}, {}, {}, {}, {}]
+        for product, core, data in zip(products, core_data, additional_data):
+            product.update(core)
+            product.update(data)
+
+        self.store.update_products(revision_number=0, modified=products[0:4])
+        self.assertEqual(Product.objects.count(), 5)
+
+        self.assertListEqual(
+            [True]*5,
+            [
+                Product.objects.filter(store=self.store, **core, data=data).exists()
+                for core, data in zip(core_data, additional_data)
+            ]
+        )
+

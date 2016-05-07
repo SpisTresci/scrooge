@@ -60,7 +60,8 @@ class DataStorageManager:
         self.__asert_is_clean()
 
         try:
-            revision = revision or self.last_revision_number()
+            # revision = revision or self.last_revision_number() # TODO: add test
+            revision = revision if revision is not None else self.last_revision_number()
             self.repo.git.checkout(self.__revision_tag_name.format(revision))
         except (GitCommandError, DataStorageManager.NoRevision):
             raise DataStorageManager.NoRevision()
