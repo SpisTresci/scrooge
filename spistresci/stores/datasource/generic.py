@@ -45,7 +45,7 @@ class DataSource:
         pass
 
     def update(self):
-        logger.info('Updating {} products...'.format(self.name))
+        print('Updating {} products...'.format(self.name))
         available_revision = self.ds_manager.last_revision_number()
         store, new = Store.objects.get_or_create(name=self.name, url=self.store_url)
 
@@ -72,7 +72,7 @@ class XmlDataSource(DataSource):
         can be retrieved later by providing name and filename
         """
 
-        logger.info('Fetching data for {}...'.format(self.name))
+        print('Fetching data for {}...'.format(self.name))
 
         filename = '{}.xml'.format(self.name.lower())
 
@@ -142,7 +142,8 @@ class XmlDataSource(DataSource):
     depth = 0
 
     def _get_product_list(self, file_content):
-        root = etree.fromstring(str.encode(file_content))
+        parser = etree.XMLParser(huge_tree=True)
+        root = etree.fromstring(str.encode(file_content), parser)
         return list(self._we_have_to_go_deeper(root, self.depth))
 
     def _we_have_to_go_deeper(self, root, depth):

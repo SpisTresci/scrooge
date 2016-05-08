@@ -1,30 +1,30 @@
-import logging
-
-from django_docopt_command import DocOptCommand
+from django.conf import settings
+from django.core.management.base import BaseCommand
 
 from spistresci.stores.manager import StoreManager
-from spistresci.stores.utils.datastoragemanager import DataStorageManager
-
-logger = logging.getLogger(__name__)
 
 
-class Command(DocOptCommand):
-    docs = '''Usage:
-    update_store_products <store_name>...
-    update_store_products --all
+class Command(BaseCommand):
+    help = '''
+    Fetches and update data for stores defined in file {}.
+    You can use different config file by setting
+    ST_STORES_CONFIG environment variable
+    '''.format(settings.ST_STORES_CONFIG)
 
-    Options:
-      -a --all     Updates all stores configured in config
-    '''
+    def add_arguments(self, parser):
+        group = parser.add_mutually_exclusive_group(required=True)
+        group.add_argument('--all', action='store_true', help='Fetches and update data for all stores in config')
+        group.add_argument('store_names', metavar='store_name', nargs='*', default=[])
 
-    def handle_docopt(self, arguments):
+    def handle(self, *args, **options):
         try:
-            manager = StoreManager(store_names=arguments['<store_name>'] if not arguments['--all'] else None)
-        except StoreManager.MissingStoreInStoresConfigException as e:
+            manager = StoreManager(store_names=options['store_names'] if not options['all'] else None)
+        except (
+            StoreManager.MissingStoreInStoresConfigException,
+            StoreManager.MissingStoreDataSourceImplementationException
+        ) as e:
             exit(e.args[0])
 
         for store in manager.get_stores():
-            try:
-                store.update()
-            except DataStorageManager.NoRevision:
-                logger.warn('{} cannot be updated. There is no fetched data for it.'.format(store.name))
+            store.fetch()
+            store.update()
