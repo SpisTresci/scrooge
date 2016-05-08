@@ -26,5 +26,6 @@ class Command(BaseCommand):
             exit(e.args[0])
 
         for store in manager.get_stores():
+            # if store.
             store.fetch()
             store.update()

@@ -5,9 +5,28 @@ from spistresci.products.models import Product
 
 
 class Store(models.Model):
+    enabled = models.BooleanField(
+        default=True,
+        help_text=_('If checked, Store will be updated according to schedule of defined jobs')
+    )
     name = models.CharField(_('Store name'), max_length=32)
     url = models.URLField(_('Store url address'))
     last_update_revision = models.IntegerField(null=True)
+
+    SINGLE_XML = 1
+
+    DATA_SOURCE_TYPE_CHOICES = (
+        (SINGLE_XML, _('Single XML')),
+    )
+
+    data_source_type = models.IntegerField(_('Data source type'), choices=DATA_SOURCE_TYPE_CHOICES)
+    data_source_url = models.URLField(_('URL address of data source'))
+
+    data_source_classes = (
+        ('xml generic', 'xml generic'),
+    )
+
+    data_source_class = models.CharField(max_length=32, choices=data_source_classes)
 
     def __str__(self):
         return '{} ({}) - {}'.format(self.name, self.last_update_revision, self.url)
