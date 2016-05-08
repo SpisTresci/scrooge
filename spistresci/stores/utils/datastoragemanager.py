@@ -57,10 +57,15 @@ class DataStorageManager:
         self.repo.create_tag("date-{}".format(date.strftime("%Y-%m-%d_%H-%M-%S-%f")))
 
     def get(self, filename, revision=None):
+        """
+        Returns content of files saved in DataStorageManager
+        :param filename: name of file, which content should be returned
+        :param revision: if not provided, last revision will be used, otherwise specified revision
+        :return: content of the specified filename
+        """
         self.__asert_is_clean()
 
         try:
-            # revision = revision or self.last_revision_number() # TODO: add test
             revision = revision if revision is not None else self.last_revision_number()
             self.repo.git.checkout(self.__revision_tag_name.format(revision))
         except (GitCommandError, DataStorageManager.NoRevision):
