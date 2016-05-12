@@ -3,7 +3,6 @@ import re
 from lxml import etree
 from urllib.request import urlopen, Request
 
-from spistresci.stores.models import Store
 from spistresci.stores.utils.datastoragemanager import DataStorageManager
 
 logger = logging.getLogger(__name__)
@@ -11,12 +10,9 @@ logger = logging.getLogger(__name__)
 
 class DataSource:
 
-    def __init__(self, store_config):
-        self.name = store_config['name']
-        self.store_url = store_config['url']
-        self.url = store_config['data_source']['url']
-        self.type = store_config['data_source']['type']
-        self.ds_manager = DataStorageManager(self.name)
+    def __init__(self, store):
+        self.store = store
+        self.ds_manager = DataStorageManager(self.store.name)
 
     @staticmethod
     def get_all_subclasses():
@@ -27,7 +23,9 @@ class DataSource:
         subclasses = {}
 
         def get_subclasses(subclasses, cls):
-            subclasses[cls.__name__] = cls
+            if cls.__name__ != DataSource.__name__:
+                subclasses[cls.__name__] = cls
+
             for subclass in cls.__subclasses__():
                 get_subclasses(subclasses, subclass)
 
@@ -45,17 +43,16 @@ class DataSource:
         pass
 
     def update(self):
-        print('Updating {} products...'.format(self.name))
+        print('Updating {} products...'.format(self.store.name))
         available_revision = self.ds_manager.last_revision_number()
-        store, new = Store.objects.get_or_create(name=self.name, url=self.store_url)
 
-        if new or store.last_update_revision is None:
+        if self.store.last_update_revision is None:
             products = self._extract(available_revision)
-            store.update_products(revision_number=available_revision, added=products)
-        elif store.last_update_revision < available_revision:
+            self.store.update_products(revision_number=available_revision, added=products)
+        elif self.store.last_update_revision < available_revision:
             products = self._extract(available_revision)
-            filtered = self._filter(products, store.last_update_revision)
-            store.update_products(
+            filtered = self._filter(products, self.store.last_update_revision)
+            self.store.update_products(
                 revision_number=available_revision,
                 added=filtered['added'],
                 deleted=filtered['deleted'],
@@ -72,11 +69,11 @@ class XmlDataSource(DataSource):
         can be retrieved later by providing name and filename
         """
 
-        print('Fetching data for {}...'.format(self.name))
+        print('Fetching data for {}...'.format(self.store.name))
 
-        filename = '{}.xml'.format(self.name.lower())
+        filename = '{}.xml'.format(self.store.name.lower())
 
-        request = Request(self.url, headers=headers or {})
+        request = Request(self.store.data_source_url, headers=headers or {})
         response = urlopen(request)
 
         chunk_size = 16 * 1024
@@ -92,7 +89,7 @@ class XmlDataSource(DataSource):
 
     def _extract(self, revision):
 
-        file_name = '{}.xml'.format(self.name.lower())
+        file_name = '{}.xml'.format(self.store.name.lower())
         file_content = self.ds_manager.get(file_name, revision)
 
         products = [
@@ -104,7 +101,7 @@ class XmlDataSource(DataSource):
 
     def _filter(self, products, prev_rev_number):
         new_product_dicts = {product['external_id']: product for product in products}
-        file_name = '{}.xml'.format(self.name.lower())
+        file_name = '{}.xml'.format(self.store.name.lower())
         file_content = self.ds_manager.get(file_name, prev_rev_number)
 
         old_products = [

@@ -2,6 +2,7 @@ from django.conf import settings
 from django.core.management.base import BaseCommand
 
 from spistresci.stores.manager import StoreManager
+from spistresci.stores.models import Store
 
 
 class Command(BaseCommand):
@@ -17,15 +18,15 @@ class Command(BaseCommand):
         group.add_argument('store_names', metavar='store_name', nargs='*', default=[])
 
     def handle(self, *args, **options):
-        try:
-            manager = StoreManager(store_names=options['store_names'] if not options['all'] else None)
-        except (
-            StoreManager.MissingStoreInStoresConfigException,
-            StoreManager.MissingStoreDataSourceImplementationException
-        ) as e:
-            exit(e.args[0])
+        # try:
+        #     manager = Store.objects.all() #store_names=options['store_names'] if not options['all'] else None)
+        # except (
+        #     StoreManager.MissingStoreInStoresConfigException,
+        #     StoreManager.MissingStoreDataSourceImplementationException
+        # ) as e:
+        #     exit(e.args[0])
 
-        for store in manager.get_stores():
+        for store in Store.objects.all():
             # if store.
             store.fetch()
             store.update()

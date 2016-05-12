@@ -2,6 +2,13 @@ from django.db import models, transaction
 from django.utils.translation import ugettext_lazy as _
 
 from spistresci.products.models import Product
+from spistresci.stores.manager import StoreManager
+
+
+def get_data_source_classes():  # TODO: Move to utils
+    subclasses = StoreManager.get_all_subclasses().keys()
+    assert 'XmlDataSource' in subclasses  # XmlDataSource is default, so we want to make sure it is available
+    return zip(subclasses, subclasses)
 
 
 class Store(models.Model):
@@ -19,17 +26,22 @@ class Store(models.Model):
         (SINGLE_XML, _('Single XML')),
     )
 
-    data_source_type = models.IntegerField(_('Data source type'), choices=DATA_SOURCE_TYPE_CHOICES)
-    data_source_url = models.URLField(_('URL address of data source'))
+    data_source_type = models.IntegerField(_('Data source type'), choices=DATA_SOURCE_TYPE_CHOICES, default=SINGLE_XML)
+    data_source_url = models.URLField(_('URL address of data source'), default=None, blank=False)
+    data_source_class = models.CharField(max_length=32, choices=get_data_source_classes(), default='XmlDataSource')
 
-    data_source_classes = (
-        ('xml generic', 'xml generic'),
-    )
-
-    data_source_class = models.CharField(max_length=32, choices=data_source_classes)
+    def data_source(self):
+        data_source_class = StoreManager.get_all_subclasses()[self.data_source_class]
+        return data_source_class(self)
 
     def __str__(self):
         return '{} ({}) - {}'.format(self.name, self.last_update_revision, self.url)
+
+    def update(self):
+        self.data_source().update()
+
+    def fetch(self):
+        self.data_source().fetch()
 
     def update_products(self, revision_number, added=None, deleted=None, modified=None):
         added = added or []
