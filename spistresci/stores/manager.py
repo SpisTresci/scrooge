@@ -11,15 +11,6 @@ from spistresci.stores.datasource.specific import *
 
 class StoreManager:
 
-    class MissingStoreInStoresConfigException(Exception):
-        def __init__(self, store_name):
-            Exception.__init__(
-                self,
-                "There is no '{}' store defined in '{}'.\n"
-                "You can use different config by specifying its location "
-                "by ST_STORES_CONFIG environment variable.".format(store_name, settings.ST_STORES_CONFIG)
-            )
-
     class MissingStoreDataSourceImplementationException(Exception):
         def __init__(self, store_name):
             Exception.__init__(

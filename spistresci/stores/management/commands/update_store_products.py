@@ -5,12 +5,7 @@ from spistresci.stores.models import Store
 
 
 class Command(BaseCommand):
-    # TODO: correct help message
-    help = '''
-    Fetches and update data for stores defined in file {}.
-    You can use different config file by setting
-    ST_STORES_CONFIG environment variable
-    '''.format(settings.ST_STORES_CONFIG)
+    help = '''Fetch and update data for ENABLED stores defined in the database.'''
 
     def add_arguments(self, parser):
         group = parser.add_mutually_exclusive_group(required=True)
@@ -29,8 +24,12 @@ class Command(BaseCommand):
                 store.update()
 
     def get_stores(self, store_names):
+        err_messages = []
         for name in store_names:
             try:
                 yield Store.objects.get(name__iexact=name)
-            except Store.DoesNotExist as e:
-                raise exit("There is no '{}' store defined in database".format(name.lower()))
+            except Store.DoesNotExist:
+                err_messages.append("There is no '{}' store defined in database".format(name.lower()))
+
+        if err_messages:
+            exit('\n'.join(err_messages))

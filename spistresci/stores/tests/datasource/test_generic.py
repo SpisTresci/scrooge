@@ -10,17 +10,13 @@ from spistresci.stores.models import Store
 from spistresci.stores.utils.datastoragemanager import DataStorageManager
 
 
-@override_settings(ST_STORES_CONFIG='spistresci/stores/tests/datasource/configs/test_xmldatasource.yml')
 class TestXmlDataSource(TestCase):
 
     def setUp(self):
-        Config.read()
-        self.store_config = Config.get()['stores']['xmldatasource']
+        self.store = Store.objects.create(name='Foo', url='http://foo.com/', data_source_url='http://foo.com/xml')
 
-    @patch('spistresci.stores.datasource.generic.DataStorageManager')
-    def test_data_source_is_instance_of_XmlDataSource(self, data_storage_manager):
-        data_source = StoreManager().get_store('xmldatasource')
-        self.assertIsInstance(data_source, XmlDataSource)
+    def test_default_data_source_is_instance_of_XmlDataSource(self):
+        self.assertIsInstance(self.store.data_source(), XmlDataSource)
 
     @patch('spistresci.stores.datasource.generic.DataStorageManager')
     @patch('spistresci.stores.datasource.generic.urlopen')
@@ -31,63 +27,48 @@ class TestXmlDataSource(TestCase):
 
         data_storage_manager.return_value.save = MagicMock()
 
-        data_source = StoreManager().get_store('xmldatasource')
-        data_source.fetch()
+        self.store.fetch()
 
-        data_storage_manager.assert_has_calls([call(self.store_config['name'])])
+        data_storage_manager.assert_has_calls([call(self.store.name)])
         data_storage_manager.return_value.save.assert_has_calls([call('foo.xml')])
 
-    @patch('spistresci.stores.datasource.generic.Store.update_products')
+    @patch('spistresci.stores.models.Store.update_products')
     @patch('spistresci.stores.datasource.generic.DataStorageManager')
     def test_update_should_update_data_only_if_new_revision_is_available(self, data_storage_manager, update_products):
-        Store.objects.create(name=self.store_config['name'], url=self.store_config['url'], last_update_revision=42)
-        data_source = StoreManager().get_store('xmldatasource')
+        self.store.last_update_revision = 42
+        self.store.save()
+
         data_storage_manager.return_value.get.return_value = '<products></products>'
 
         data_storage_manager.return_value.last_revision_number.return_value = 42
-        data_source.update()
+        self.store.update()
         self.assertEqual(update_products.call_count, 0)
 
         data_storage_manager.return_value.last_revision_number.return_value = 43
-        data_source.update()
+        self.store.update()
         update_products.assert_called_once_with(revision_number=43, added=[], deleted=[], modified=[])
-
-    @patch('spistresci.stores.datasource.generic.Store.update_products')
-    @patch('spistresci.stores.datasource.generic.DataStorageManager')
-    def test_update_creates_store_if_it_does_not_exist(self, data_storage_manager, update_products):
-        self.assertEqual(Store.objects.count(), 0)
-
-        data_storage_manager.return_value.get.return_value = '<products></products>'
-        data_storage_manager.return_value.last_revision_number.return_value = 0
-
-        data_source = StoreManager().get_store('xmldatasource')
-        data_source.update()
-        self.assertEqual(Store.objects.count(), 1)
 
     @patch('spistresci.stores.datasource.generic.DataStorageManager')
     def test_update_passes_no_revision_exception_if_there_is_no_data_in_ds(self, data_storage_manager):
         data_storage_manager.return_value.last_revision_number.side_effect = DataStorageManager.NoRevision()
 
-        data_source = StoreManager().get_store('xmldatasource')
         with self.assertRaises(DataStorageManager.NoRevision):
-            data_source.update()
+            self.store.update()
 
 
-@override_settings(ST_STORES_CONFIG='spistresci/stores/tests/datasource/configs/test_xmldatasource.yml')
 class TestXmlDataSource2(TestCase):
 
     def setUp(self):
         self.patcher1 = patch('spistresci.stores.datasource.generic.DataStorageManager')
-        self.patcher2 = patch('spistresci.stores.datasource.generic.Store.update_products')
+        self.patcher2 = patch('spistresci.stores.models.Store.update_products')
         self.addCleanup(self.patcher1.stop)
         self.addCleanup(self.patcher2.stop)
-
-        Config.read()
-        self.store_config = Config.get()['stores']['xmldatasource']
         self.data_storage_manager = self.patcher1.start()
         self.update_products = self.patcher2.start()
 
-        Store.objects.create(name=self.store_config['name'], url=self.store_config['url'], last_update_revision=0)
+        self.store = Store.objects.create(
+            name='Foo', url='http://foo.com/', data_source_url='http://foo.com/xml', last_update_revision=0
+        )
         self.data_storage_manager.return_value.last_revision_number.return_value = 1
 
         self.rev0 = '''
@@ -100,8 +81,7 @@ class TestXmlDataSource2(TestCase):
 
         self.data_storage_manager.return_value.get.side_effect = lambda f, rev: self.rev0 if rev == 0 else self.rev1
 
-        self.data_source = StoreManager().get_store('xmldatasource')
-        self.data_source.xml_tag_dict = {
+        XmlDataSource.xml_tag_dict = {
             'external_id': ('./id', ''),
             'title': ('./title', ''),
         }
@@ -131,7 +111,7 @@ class TestXmlDataSource2(TestCase):
             </products>
             '''
 
-        self.data_source.update()
+        self.store.update()
 
         expected = {
             'added': [
@@ -154,7 +134,7 @@ class TestXmlDataSource2(TestCase):
             </products>
             '''
 
-        self.data_source.update()
+        self.store.update()
 
         expected = {
             'added': [],
@@ -172,7 +152,7 @@ class TestXmlDataSource2(TestCase):
     def test_update__products_were_deleted(self):
         self.rev1 = "<products></products>"
 
-        self.data_source.update()
+        self.store.update()
 
         expected = {
             'added': [],
@@ -195,7 +175,7 @@ class TestXmlDataSource2(TestCase):
             </products>
             '''
 
-        self.data_source.update()
+        self.store.update()
 
         self.update_products.assert_called_once_with(
             revision_number=1,
@@ -206,5 +186,5 @@ class TestXmlDataSource2(TestCase):
 
     def test_update__products_were_not_changed(self):
         self.rev1 = self.rev0
-        self.data_source.update()
+        self.store.update()
         self.update_products.assert_called_once_with(revision_number=1, added=[], deleted=[], modified=[])

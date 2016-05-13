@@ -1,7 +1,0 @@
-stores:
-  xmldatasource:
-    name: Foo
-    url: http://foo.com/
-    data_source:
-      type: single_xml
-      url: http://foo.com/xml/xml

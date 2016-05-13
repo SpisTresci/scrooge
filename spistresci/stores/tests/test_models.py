@@ -9,7 +9,7 @@ from spistresci.stores.models import Store
 class TestStore(TestCase):
 
     def setUp(self):
-        self.store = Store.objects.create(name='Foo', url='http://foo.com/')
+        self.store = Store.objects.create(name='Foo', url='http://foo.com/', data_source_url='http://foo.com/xml')
 
     def test_update_products__update_revision_number(self):
         self.assertEqual(self.store.last_update_revision, None)

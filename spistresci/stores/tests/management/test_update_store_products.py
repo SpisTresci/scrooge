@@ -39,11 +39,12 @@ class TestUpdateStoreProducts(TestCase):
         self.assertEqual(update.call_count, 3)
         self.assertEqual(fetch.call_count, 3)
 
-    def test__not_existing_store_in_db_as_param_cause_cmd_to_fail(self, update, fetch):
-        not_existing_store_name = 'NoFoo'
-        expected_msg = "There is no '{}' store defined in database".format(
-            not_existing_store_name.lower()
-        )
+    def test__not_existing_store_in_db_as_param_cause_cmd_to_fail_at_the_end(self, update, fetch):
+        not_existing_stores = ['NoFoo', 'NoBar']
+        expected_msg = '\n'.join([
+            "There is no '{}' store defined in database".format(store_name.lower())
+            for store_name in not_existing_stores
+        ])
 
         with self.assertRaisesMessage(SystemExit, expected_msg):
-            call_command('update_store_products', 'Foo', 'Bar', not_existing_store_name)
+            call_command('update_store_products', 'Foo', not_existing_stores[0], 'Bar', not_existing_stores[1])
