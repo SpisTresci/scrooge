@@ -1,4 +1,3 @@
-from django.conf import settings
 from django.core.management.base import BaseCommand
 
 from spistresci.stores.models import Store
@@ -9,7 +8,9 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         group = parser.add_mutually_exclusive_group(required=True)
-        group.add_argument('--all', action='store_true', help='Fetches and update data for all stores in config')
+        group.add_argument(
+            '--all', action='store_true', help='Fetch and update data for all enabled stores defined in database'
+        )
         group.add_argument('store_names', metavar='store_name', nargs='*', default=[])
 
     def handle(self, *args, **options):

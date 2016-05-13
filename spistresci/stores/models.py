@@ -2,11 +2,14 @@ from django.db import models, transaction
 from django.utils.translation import ugettext_lazy as _
 
 from spistresci.products.models import Product
-from spistresci.stores.manager import StoreManager
+from spistresci.stores.datasource.generic import DataSource
+# noinspection PyUnresolvedReferences
+# statement used for autodiscover, TODO: replace with http://stackoverflow.com/questions/32335967/
+from spistresci.stores.datasource.specific import *
 
 
 def get_data_source_classes():  # TODO: Move to utils
-    subclasses = StoreManager.get_all_subclasses().keys()
+    subclasses = sorted(DataSource.get_all_subclasses().keys())
     assert 'XmlDataSource' in subclasses  # XmlDataSource is default, so we want to make sure it is available
     return zip(subclasses, subclasses)
 
@@ -31,7 +34,7 @@ class Store(models.Model):
     data_source_class = models.CharField(max_length=32, choices=get_data_source_classes(), default='XmlDataSource')
 
     def data_source(self):
-        data_source_class = StoreManager.get_all_subclasses()[self.data_source_class]
+        data_source_class = DataSource.get_all_subclasses()[self.data_source_class]
         return data_source_class(self)
 
     def __str__(self):

@@ -1,11 +1,6 @@
 from test_plus.test import TestCase
 from unittest.mock import patch, Mock, MagicMock, call
-
-from django.test.utils import override_settings
-
-from spistresci.stores.config import Config
 from spistresci.stores.datasource.generic import XmlDataSource
-from spistresci.stores.manager import StoreManager
 from spistresci.stores.models import Store
 from spistresci.stores.utils.datastoragemanager import DataStorageManager
 

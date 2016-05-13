@@ -124,7 +124,6 @@ CELERY_ALWAYS_EAGER = True
 ########## END CELERY
 
 # Your local stuff: Below this line define 3rd party library settings
-ST_STORES_CONFIG = env("ST_STORES_CONFIG", default=ROOT_DIR('stores.example.yml'))
 
 # Django-chroniker
 BASE_URL='http://localhost:8000'
