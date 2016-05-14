@@ -93,13 +93,20 @@ class XmlDataSource(DataSource):
 
         file_name = '{}.xml'.format(self.store.name.lower())
         file_content = self.ds_manager.get(file_name, revision)
+        unique_products = {}
 
-        products = [
-            self._make_dict(product_xml_node)
-            for product_xml_node in self._get_product_list(file_content)
-        ]
+        for product_xml_node in self._get_product_list(file_content):
+            product = self._make_dict(product_xml_node)
+            external_id = product['external_id']
 
-        return products
+            if external_id not in unique_products.keys():
+                unique_products[external_id] = product
+            else:
+                logger.warning(
+                    '[{}] Product with external_id "{}" is not unique!'.format(self.store.name, external_id)
+                )
+
+        return list(unique_products.values())
 
     def _filter(self, products, prev_rev_number):
         new_product_dicts = {product['external_id']: product for product in products}

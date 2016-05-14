@@ -8,6 +8,7 @@ Local settings
 - Add django-extensions as app
 '''
 
+import sys
 from .common import *  # noqa
 
 # DEBUG
@@ -87,6 +88,10 @@ LOGGING = {
     },
 }
 
+if sys.argv[1] == 'test':
+    # during tests don't log on console or to file
+    del LOGGING['loggers']['spistresci']
+
 # django-debug-toolbar
 # ------------------------------------------------------------------------------
 MIDDLEWARE_CLASSES += ('debug_toolbar.middleware.DebugToolbarMiddleware',)
@@ -104,19 +109,6 @@ DEBUG_TOOLBAR_CONFIG = {
 # django-extensions
 # ------------------------------------------------------------------------------
 INSTALLED_APPS += ('django_extensions', )
-
-# TESTING
-# ------------------------------------------------------------------------------
-import logging
-from django.test.runner import DiscoverRunner
-
-
-class NoLoggingTestRunner(DiscoverRunner):
-    def run_tests(self, test_labels, extra_tests=None, **kwargs):
-        logging.disable(logging.CRITICAL)  # disable logging below CRITICAL while testing
-        return super(NoLoggingTestRunner, self).run_tests(test_labels, extra_tests, **kwargs)
-
-TEST_RUNNER = 'config.settings.local.NoLoggingTestRunner'
 
 ########## CELERY
 # In development, all tasks will be executed locally by blocking until the task returns

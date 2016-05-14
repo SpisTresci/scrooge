@@ -51,7 +51,7 @@ class TestXmlDataSource(TestCase):
             self.store.update()
 
 
-class TestXmlDataSource2(TestCase):
+class TestUpdateOfXmlDataSource(TestCase):
 
     def setUp(self):
         self.patcher1 = patch('spistresci.stores.datasource.generic.DataStorageManager')
@@ -183,3 +183,42 @@ class TestXmlDataSource2(TestCase):
         self.rev1 = self.rev0
         self.store.update()
         self.update_products.assert_called_once_with(revision_number=1, added=[], deleted=[], modified=[])
+
+    def test_update__duplicated_products_are_ignored(self):
+        self.rev1 = '''
+            <products>
+                <product><id>1</id><title>AAA</title></product>
+                <product><id>2</id><title>BBB</title></product>
+
+                <product><id>3</id><title>CCC</title></product>
+                <product><id>3</id><title>CCC - 2</title></product>
+
+                <product><id>4</id><title>DDD</title></product>
+                <product><id>4</id><title>DDD - 2</title></product>
+                <product><id>4</id><title>DDD - 3</title></product>
+
+                <product><id>5</id><title>EEE</title></product>
+            </products>
+            '''
+
+        with self.assertLogs(level='WARNING') as cm:
+            self.store.update()
+
+        self.assertEqual(cm.output, [
+            'WARNING:spistresci.stores.datasource.generic:[Foo] Product with external_id "3" is not unique!',
+            'WARNING:spistresci.stores.datasource.generic:[Foo] Product with external_id "4" is not unique!',
+            'WARNING:spistresci.stores.datasource.generic:[Foo] Product with external_id "4" is not unique!'
+        ])
+
+        expected = {
+            'added': [
+                {'external_id': '3', 'title': 'CCC'},
+                {'external_id': '4', 'title': 'DDD'},
+                {'external_id': '5', 'title': 'EEE'},
+            ],
+            'deleted': [],
+            'modified': [],
+            'revision_number': 1
+        }
+
+        self.assert_helper(self.update_products.call_args, expected)
