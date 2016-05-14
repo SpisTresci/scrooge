@@ -58,6 +58,8 @@ class DataSource:
                 deleted=filtered['deleted'],
                 modified=filtered['modified']
             )
+        else:
+            print('There are no new revision available!')
 
 
 class XmlDataSource(DataSource):
