@@ -1,3 +1,4 @@
+from datetime import datetime
 from django.db import models, transaction
 from django.utils.translation import ugettext_lazy as _
 
@@ -33,12 +34,19 @@ class Store(models.Model):
     data_source_url = models.URLField(_('URL address of data source'), default=None, blank=False)
     data_source_class = models.CharField(max_length=32, choices=get_data_source_classes(), default='XmlDataSource')
 
+    last_successful_update = models.DateTimeField(_('Time of last successful update'), default=None, null=True)
+    last_changing_products_update = models.DateTimeField(
+        _('Time of last successful update which changed any product'),
+        default=None,
+        null=True
+    )
+
     def data_source(self):
         data_source_class = DataSource.get_all_subclasses()[self.data_source_class]
         return data_source_class(self)
 
     def __str__(self):
-        return '{} ({}) - {}'.format(self.name, self.last_update_revision, self.url)
+        return '{} - {}'.format(self.name, self.url)
 
     def update(self):
         self.data_source().update()
@@ -60,6 +68,11 @@ class Store(models.Model):
             # print('After modify {}'.format(len(connection.queries)))
 
             self.last_update_revision = revision_number
+            self.last_successful_update = datetime.now()
+
+            if added or deleted or modified:
+                self.last_changing_products_update = datetime.now()
+
             self.save()
 
             print('{} products added'.format(len(added)))
