@@ -21,30 +21,74 @@ class TestUpdateStoreProducts(TestCase):
             ]
         )
 
-    def test__all_enabled_stores_are_updated(self, update, fetch):
+    def test__all_enabled_stores_are_updated(self, fetch, update):
         call_command('update_store_products', '--all')
 
-        self.assertEqual(update.call_count, 3)
         self.assertEqual(fetch.call_count, 3)
+        self.assertEqual(update.call_count, 3)
 
-    def test__selected_stores_are_updated_if_they_are_enabled(self, update, fetch):
+    def test__selected_stores_are_updated_if_they_are_enabled(self, fetch, update):
         call_command('update_store_products', 'Foo', 'Bar', 'Baz')
 
-        self.assertEqual(update.call_count, 2)
         self.assertEqual(fetch.call_count, 2)
+        self.assertEqual(update.call_count, 2)
 
-    def test__name_of_stores_are_case_insensitive(self, update, fetch):
+    def test__name_of_stores_are_case_insensitive(self, fetch, update):
         call_command('update_store_products', 'FOO',  'bar', 'BaZ', 'Qux')
 
-        self.assertEqual(update.call_count, 3)
         self.assertEqual(fetch.call_count, 3)
+        self.assertEqual(update.call_count, 3)
 
-    def test__not_existing_store_in_db_as_param_cause_cmd_to_fail_at_the_end(self, update, fetch):
+    def test__not_existing_store_in_db_as_param_cause_cmd_to_fail_at_the_end(self, fetch, update):
         not_existing_stores = ['NoFoo', 'NoBar']
-        expected_msg = '\n'.join([
-            "There is no '{}' store defined in database".format(store_name.lower())
-            for store_name in not_existing_stores
+
+        with self.assertRaises(SystemExit) as exception_cm:
+            with self.assertLogs(level='WARNING') as logger_cm:
+                call_command('update_store_products', 'Foo', not_existing_stores[0], 'Bar', not_existing_stores[1])
+
+        self.assertEqual(logger_cm.output, [
+            "ERROR:spistresci.stores.management.commands.update_store_products:"
+            "There is no '{}' store defined in database".format(name.lower()) for name in not_existing_stores
         ])
 
-        with self.assertRaisesMessage(SystemExit, expected_msg):
-            call_command('update_store_products', 'Foo', not_existing_stores[0], 'Bar', not_existing_stores[1])
+        self.assertEqual(exception_cm.exception.code, 1)
+
+    def test__all_exceptions_are_logged(self, fetch, update):
+        update.side_effect = [Exception('Error1'), Exception('2nd Error')]
+
+        with self.assertRaises(SystemExit) as exception_cm:
+            with self.assertLogs(level='WARNING') as logger_cm:
+                call_command('update_store_products', 'Foo', 'Bar')
+
+        self.assertIn(
+            "CRITICAL:spistresci.stores.management.commands.update_store_products:[Store:Foo] Error1",
+            logger_cm.output[0]
+        )
+        self.assertIn(
+            "CRITICAL:spistresci.stores.management.commands.update_store_products:[Store:Bar] 2nd Error",
+            logger_cm.output[1]
+        )
+
+        self.assertEqual(exception_cm.exception.code, 1)
+
+    def test__update_is_not_stopped_for_next_store_if_update_of_prev_store_failed(self, fetch, update):
+        fetch.side_effect = [Exception('Error1'), Exception('2nd Error'), None]
+
+        with self.assertRaises(SystemExit) as exception_cm:
+            with self.assertLogs(level='WARNING') as logger_cm:
+                call_command('update_store_products', 'Foo', 'Bar', 'Qux')
+
+        self.assertEqual(len(logger_cm.output), 2)
+        self.assertEqual(fetch.call_count, 3)
+        self.assertEqual(update.call_count, 1)
+
+        self.assertIn(
+            "CRITICAL:spistresci.stores.management.commands.update_store_products:[Store:Foo] Error1",
+            logger_cm.output[0]
+        )
+        self.assertIn(
+            "CRITICAL:spistresci.stores.management.commands.update_store_products:[Store:Bar] 2nd Error",
+            logger_cm.output[1]
+        )
+
+        self.assertEqual(exception_cm.exception.code, 1)

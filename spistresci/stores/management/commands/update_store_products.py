@@ -1,6 +1,10 @@
+import logging
+import traceback
 from django.core.management.base import BaseCommand
 
 from spistresci.stores.models import Store
+
+logger = logging.getLogger(__name__)
 
 
 class Command(BaseCommand):
@@ -16,21 +20,31 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
 
         stores = Store.objects.all() if options['all'] else self.get_stores(options['store_names'])
-
+        err_messages = []
         for store in stores:
-            if not store.enabled:
-                print('Store {} is disabled'.format(store.name))
-            else:
-                store.fetch()
-                store.update()
+            try:
+                if not store.enabled:
+                    logger.info('Store {} is disabled'.format(store.name))
+                else:
+                    store.fetch()
+                    store.update()
+            except Exception as e:
+                logger.critical('[Store:{}] {}\n{}'.format(store.name, str(e), traceback.format_exc()))
+                err_messages.append(e)
+                logger.info('Update for {} failed, but trying to finish job for other stores...'.format(store.name))
+
+        if err_messages:
+            exit(1)
 
     def get_stores(self, store_names):
         err_messages = []
         for name in store_names:
             try:
                 yield Store.objects.get(name__iexact=name)
-            except Store.DoesNotExist:
-                err_messages.append("There is no '{}' store defined in database".format(name.lower()))
+            except Store.DoesNotExist as e:
+                logger.error("There is no '{}' store defined in database".format(name.lower()))
+                err_messages.append(e)
+                logger.info('Update for {} failed, but trying to finish job for other stores...'.format(name.lower()))
 
         if err_messages:
-            exit('\n'.join(err_messages))
+            exit(1)

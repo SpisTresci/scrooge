@@ -88,7 +88,7 @@ LOGGING = {
     },
 }
 
-if sys.argv[1] == 'test':
+if len(sys.argv) > 1 and sys.argv[1] == 'test':
     # during tests don't log on console or to file
     del LOGGING['loggers']['spistresci']
 
