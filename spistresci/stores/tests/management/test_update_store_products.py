@@ -22,19 +22,34 @@ class TestUpdateStoreProducts(TestCase):
         )
 
     def test__all_enabled_stores_are_updated(self, fetch, update):
-        call_command('update_store_products', '--all')
+        with self.assertLogs(level='INFO') as cm:
+            call_command('update_store_products', '--all')
+
+        self.assertEqual(cm.output, [
+            "INFO:spistresci.stores.management.commands.update_store_products:Store Baz is disabled"
+        ])
 
         self.assertEqual(fetch.call_count, 3)
         self.assertEqual(update.call_count, 3)
 
     def test__selected_stores_are_updated_if_they_are_enabled(self, fetch, update):
-        call_command('update_store_products', 'Foo', 'Bar', 'Baz')
+        with self.assertLogs(level='INFO') as cm:
+            call_command('update_store_products', 'Foo', 'Bar', 'Baz')
+
+        self.assertEqual(cm.output, [
+            "INFO:spistresci.stores.management.commands.update_store_products:Store Baz is disabled"
+        ])
 
         self.assertEqual(fetch.call_count, 2)
         self.assertEqual(update.call_count, 2)
 
     def test__name_of_stores_are_case_insensitive(self, fetch, update):
-        call_command('update_store_products', 'FOO',  'bar', 'BaZ', 'Qux')
+        with self.assertLogs(level='INFO') as cm:
+            call_command('update_store_products', 'FOO',  'bar', 'BaZ', 'Qux')
+
+        self.assertEqual(cm.output, [
+            "INFO:spistresci.stores.management.commands.update_store_products:Store Baz is disabled"
+        ])
 
         self.assertEqual(fetch.call_count, 3)
         self.assertEqual(update.call_count, 3)

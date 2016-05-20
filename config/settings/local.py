@@ -92,6 +92,32 @@ if len(sys.argv) > 1 and sys.argv[1] == 'test':
     # during tests don't log on console or to file
     del LOGGING['loggers']['spistresci']
 
+    LOGGING['formatters']['info_about_assert_logs'] = {
+        '()': 'colorlog.ColoredFormatter',
+        'format': '\n%(red)sEvery log on WARNING level or above should be catched with assertLogs in tests!%(reset)s'
+                  '\n\n%(bold_white)s[%(asctime)s]%(log_color)s %(levelname)-8s%(reset)s %(message)s',
+        'log_colors': {
+          'DEBUG': 'cyan',
+          'INFO': 'green',
+          'WARNING': 'yellow',
+          'ERROR': 'red',
+          'CRITICAL': 'red,bg_white',
+        },
+        'datefmt': '%H:%M:%S'
+    }
+
+    LOGGING['handlers']['test_console'] = {
+        'level': 'WARNING',
+        'class': 'logging.StreamHandler',
+        'formatter': 'info_about_assert_logs'
+    }
+
+    LOGGING['root'] = {
+        'level': 'DEBUG',
+        'handlers': ['test_console'],
+    }
+
+
 # django-debug-toolbar
 # ------------------------------------------------------------------------------
 MIDDLEWARE_CLASSES += ('debug_toolbar.middleware.DebugToolbarMiddleware',)
