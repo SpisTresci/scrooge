@@ -43,7 +43,7 @@ class DataSource:
         pass
 
     def update(self):
-        print('Updating {} products...'.format(self.store.name))
+        logger.info('[Store:{}] Updating products...'.format(self.store.name))
         available_revision = self.ds_manager.last_revision_number()
 
         if self.store.last_update_revision is None:
@@ -59,7 +59,7 @@ class DataSource:
                 modified=filtered['modified']
             )
         else:
-            print('There are no new revision available!')
+            logger.info('[Store:{}] There are no new revision available!')
 
 
 class XmlDataSource(DataSource):
@@ -71,7 +71,7 @@ class XmlDataSource(DataSource):
         can be retrieved later by providing name and filename
         """
 
-        print('Fetching data for {}...'.format(self.store.name))
+        logger.info('[Store:{}] Fetching data from {}'.format(self.store.name, self.store.data_source_url))
 
         filename = '{}.xml'.format(self.store.name.lower())
 
@@ -90,6 +90,7 @@ class XmlDataSource(DataSource):
         return filename
 
     def _extract(self, revision):
+        logger.info('[Store:{}] Extracting data from XML (revision:{})...'.format(self.store.name, revision))
 
         file_name = '{}.xml'.format(self.store.name.lower())
         file_content = self.ds_manager.get(file_name, revision)
@@ -103,22 +104,21 @@ class XmlDataSource(DataSource):
                 unique_products[external_id] = product
             else:
                 logger.warning(
-                    '[{}] Product with external_id "{}" is not unique!'.format(self.store.name, external_id)
+                    '[Store:{}] Product with external_id "{}" is not unique!'.format(self.store.name, external_id)
                 )
 
         return list(unique_products.values())
 
     def _filter(self, products, prev_rev_number):
-        new_product_dicts = {product['external_id']: product for product in products}
-        file_name = '{}.xml'.format(self.store.name.lower())
-        file_content = self.ds_manager.get(file_name, prev_rev_number)
-
-        old_products = [
-            self._make_dict(product_xml_node)
-            for product_xml_node in self._get_product_list(file_content)
-        ]
+        logger.info(
+            '[Store:{}] Filtering by data from previous version of XML (revision:{})...'.format(
+                self.store.name, prev_rev_number
+            )
+        )
+        old_products = self._extract(prev_rev_number)
 
         old_product_dicts = {product['external_id']: product for product in old_products}
+        new_product_dicts = {product['external_id']: product for product in products}
 
         products_added = [
             new_product_dicts[key]
@@ -148,7 +148,9 @@ class XmlDataSource(DataSource):
     depth = 0
 
     def _get_product_list(self, file_content):
+        logger.info('[Store:{}] Parsing XML...'.format(self.store.name))
         parser = etree.XMLParser(huge_tree=True)
+        logger.info('[Store:{}] Parsing went well :)'.format(self.store.name))
         root = etree.fromstring(str.encode(file_content), parser)
         return list(self._we_have_to_go_deeper(root, self.depth))
 

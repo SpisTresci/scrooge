@@ -31,10 +31,12 @@ class Command(BaseCommand):
             except Exception as e:
                 logger.critical('[Store:{}] {}\n{}'.format(store.name, str(e), traceback.format_exc()))
                 err_messages.append(e)
-                logger.info('Update for {} failed, but trying to finish job for other stores...'.format(store.name))
+                logger.info('[Store:{}] Update failed, but trying to finish job for other stores...'.format(store.name))
 
         if err_messages:
             exit(1)
+
+        logger.info('Update is finished')
 
     def get_stores(self, store_names):
         err_messages = []
@@ -42,9 +44,11 @@ class Command(BaseCommand):
             try:
                 yield Store.objects.get(name__iexact=name)
             except Store.DoesNotExist as e:
-                logger.error("There is no '{}' store defined in database".format(name.lower()))
+                logger.error("[Store:{}] There is such store defined in database".format(name.lower()))
                 err_messages.append(e)
-                logger.info('Update for {} failed, but trying to finish job for other stores...'.format(name.lower()))
+                logger.info(
+                    '[Store:{}] Update failed, but trying to finish job for other stores...'.format(name.lower())
+                )
 
         if err_messages:
             exit(1)

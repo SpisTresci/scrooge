@@ -22,34 +22,19 @@ class TestUpdateStoreProducts(TestCase):
         )
 
     def test__all_enabled_stores_are_updated(self, fetch, update):
-        with self.assertLogs(level='INFO') as cm:
-            call_command('update_store_products', '--all')
-
-        self.assertEqual(cm.output, [
-            "INFO:spistresci.stores.management.commands.update_store_products:Store Baz is disabled"
-        ])
+        call_command('update_store_products', '--all')
 
         self.assertEqual(fetch.call_count, 3)
         self.assertEqual(update.call_count, 3)
 
     def test__selected_stores_are_updated_if_they_are_enabled(self, fetch, update):
-        with self.assertLogs(level='INFO') as cm:
-            call_command('update_store_products', 'Foo', 'Bar', 'Baz')
-
-        self.assertEqual(cm.output, [
-            "INFO:spistresci.stores.management.commands.update_store_products:Store Baz is disabled"
-        ])
+        call_command('update_store_products', 'Foo', 'Bar', 'Baz')
 
         self.assertEqual(fetch.call_count, 2)
         self.assertEqual(update.call_count, 2)
 
     def test__name_of_stores_are_case_insensitive(self, fetch, update):
-        with self.assertLogs(level='INFO') as cm:
-            call_command('update_store_products', 'FOO',  'bar', 'BaZ', 'Qux')
-
-        self.assertEqual(cm.output, [
-            "INFO:spistresci.stores.management.commands.update_store_products:Store Baz is disabled"
-        ])
+        call_command('update_store_products', 'FOO',  'bar', 'BaZ', 'Qux')
 
         self.assertEqual(fetch.call_count, 3)
         self.assertEqual(update.call_count, 3)
@@ -63,7 +48,7 @@ class TestUpdateStoreProducts(TestCase):
 
         self.assertEqual(logger_cm.output, [
             "ERROR:spistresci.stores.management.commands.update_store_products:"
-            "There is no '{}' store defined in database".format(name.lower()) for name in not_existing_stores
+            "[Store:{}] There is such store defined in database".format(name.lower()) for name in not_existing_stores
         ])
 
         self.assertEqual(exception_cm.exception.code, 1)

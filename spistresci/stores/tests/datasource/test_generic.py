@@ -205,9 +205,9 @@ class TestUpdateOfXmlDataSource(TestCase):
             self.store.update()
 
         self.assertEqual(cm.output, [
-            'WARNING:spistresci.stores.datasource.generic:[Foo] Product with external_id "3" is not unique!',
-            'WARNING:spistresci.stores.datasource.generic:[Foo] Product with external_id "4" is not unique!',
-            'WARNING:spistresci.stores.datasource.generic:[Foo] Product with external_id "4" is not unique!'
+            'WARNING:spistresci.stores.datasource.generic:[Store:Foo] Product with external_id "3" is not unique!',
+            'WARNING:spistresci.stores.datasource.generic:[Store:Foo] Product with external_id "4" is not unique!',
+            'WARNING:spistresci.stores.datasource.generic:[Store:Foo] Product with external_id "4" is not unique!'
         ])
 
         expected = {

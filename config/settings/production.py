@@ -19,6 +19,7 @@ from boto.s3.connection import OrdinaryCallingFormat
 from django.utils import six
 
 import logging
+import sys
 
 
 from .common import *  # noqa
@@ -182,7 +183,14 @@ LOGGING = {
         'console': {
             'level': 'DEBUG',
             'class': 'logging.StreamHandler',
-            'formatter': 'verbose'
+            'formatter': 'verbose',
+            'stream': sys.stdout
+        },
+        'console_stderr': {
+            'level': 'ERROR',
+            'class': 'logging.StreamHandler',
+            'formatter': 'verbose',
+            'stream': sys.stderr
         },
         'st_logfile': {
             'level': 'INFO',
@@ -217,7 +225,7 @@ LOGGING = {
         },
         'spistresci': {
             'level': 'INFO',
-            'handlers': ['console', 'st_logfile'],
+            'handlers': ['console', 'console_stderr', 'st_logfile'],
             'propagate': False,
         }
     },

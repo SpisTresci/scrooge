@@ -67,7 +67,14 @@ LOGGING = {
         'console': {
             'level': 'DEBUG',
             'class': 'logging.StreamHandler',
-            'formatter': 'simple'
+            'formatter': 'simple',
+            'stream': sys.stdout
+        },
+        'console_stderr': {
+            'level': 'ERROR',
+            'class': 'logging.StreamHandler',
+            'formatter': 'simple',
+            'stream': sys.stderr
         },
         'st_logfile': {
             'level': 'INFO',
@@ -82,7 +89,7 @@ LOGGING = {
     'loggers': {
         'spistresci': {
             'level': 'DEBUG',
-            'handlers': ['console', 'st_logfile'],
+            'handlers': ['console', 'console_stderr', 'st_logfile'],
             'propagate': False,
         }
     },

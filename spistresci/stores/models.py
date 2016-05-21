@@ -1,4 +1,6 @@
 from datetime import datetime
+import logging
+
 from django.db import models, transaction
 from django.utils.translation import ugettext_lazy as _
 
@@ -7,6 +9,8 @@ from spistresci.stores.datasource.generic import DataSource
 # noinspection PyUnresolvedReferences
 # statement used for autodiscover, TODO: replace with http://stackoverflow.com/questions/32335967/
 from spistresci.stores.datasource.specific import *
+
+logger = logging.getLogger(__name__)
 
 
 def get_data_source_classes():  # TODO: Move to utils
@@ -75,9 +79,9 @@ class Store(models.Model):
 
             self.save()
 
-            print('{} products added'.format(len(added)))
-            print('{} products deleted'.format(len(deleted)))
-            print('{} products modified'.format(len(modified)))
+            logger.info('[Store:{}] {} products added'.format(self.name, len(added)))
+            logger.info('[Store:{}] {} products deleted'.format(self.name, len(deleted)))
+            logger.info('[Store:{}] {} products modified'.format(self.name, len(modified)))
 
     def __add_products(self, products):
         if not products:
@@ -92,7 +96,7 @@ class Store(models.Model):
                     data[product_key] = product_dict.pop(product_key)
 
             product = Product.objects.create(store=self, data=data, **product_dict)  # TODO: change to bulk_create?
-            print('New product: {}'.format(str(product)))
+            logger.info('[Store:{}] New product: {}'.format(self.name, str(product)))
 
     def __delete_products(self, products):
         if not products:
@@ -110,22 +114,31 @@ class Store(models.Model):
             return
 
         class ChangeLogger:
-            def __init__(self, product_id):
+            def __init__(self, store_name, product_id, logger):
+                self.store_name = store_name
                 self.product_id = product_id
+                self.logger = logger
                 self.changes = []
 
-            def log(self, key, db_value, new_value, db_value_type=None, new_value_type=None):
+            def add(self, key, db_value, new_value, db_value_type=None, new_value_type=None):
                 db_value_type = db_value_type or type(db_value)
                 new_value_type = new_value_type or type(new_value)
                 self.changes.append(
                     '[{}] {} ({}) => {} ({})'.format(key, db_value, db_value_type, new_value, new_value_type)
                 )
 
-            def __str__(self):
+            def log(self):
+
                 if not self.changes:
-                    return '{}\n\tWARN - no changes, but product was on "modified" list'.format(self.product_id)
+                    logger.warning(
+                        '[Store:{}][Product:{}]\n\t'
+                        'No changes, but product was on "modified" list'.format(self.store_name, self.product_id)
+                    )
                 else:
-                    return '{}\n\t'.format(self.product_id) + '\n\t'.join(self.changes)
+                    logger.info(
+                        '[Store:{}][Product:{}]\n\t'
+                        '{}'.format(self.store_name, self.product_id, '\n\t'.join(self.changes))
+                    )
 
         core_fields = []
 
@@ -140,27 +153,27 @@ class Store(models.Model):
         ).order_by('external_id')
 
         for product_db, product_dict in zip(sorted_products_queryset, sorted_modified):
-            logger = ChangeLogger(product_id=product_db.external_id)
+            changes = ChangeLogger(self.name, product_db.external_id, logger)
             for key in set(list(product_db.to_dict().keys()) + list(product_dict.keys())):
 
                 if key in core_fields:
                     if key not in product_dict:
                         new_val = Product._meta.get_field_by_name(key)[0].default
-                        logger.log(key, '<no_value>', new_val, db_value_type='<no_type>')
+                        changes.add(key, '<no_value>', new_val, db_value_type='<no_type>')
                         setattr(product_db, key, new_val)
                     elif getattr(product_db, key) != type(getattr(product_db, key))(product_dict[key]):
-                        logger.log(key, getattr(product_db, key), product_dict[key])
+                        changes.add(key, getattr(product_db, key), product_dict[key])
                         setattr(product_db, key, product_dict[key])
                 else:
                     if key in product_db.data and key in product_dict and product_db.data[key] != product_dict[key]:
-                        logger.log(key, product_db.data[key], product_dict[key])
+                        changes.add(key, product_db.data[key], product_dict[key])
                         product_db.data[key] = product_dict[key]
                     elif key in product_db.data and key not in product_dict:
-                        logger.log(key, product_db.data[key], '<no_value>', new_value_type='<no_type>')
+                        changes.add(key, product_db.data[key], '<no_value>', new_value_type='<no_type>')
                         del product_db.data[key]
                     elif key not in product_db.data and key in product_dict:
-                        logger.log(key, '<no_value>', product_dict[key], db_value_type='<no_type>')
+                        changes.add(key, '<no_value>', product_dict[key], db_value_type='<no_type>')
                         product_db.data[key] = product_dict[key]  # TODO: add initializing by type .price = Decimal(price)
 
-            print(logger)
+            changes.log()
             product_db.save()

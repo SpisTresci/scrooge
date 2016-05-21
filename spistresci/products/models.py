@@ -4,8 +4,6 @@ from django.db import models
 from django.contrib.postgres.fields import JSONField
 from django.utils.translation import ugettext_lazy as _
 
-# Create your models here.
-
 
 class Product(models.Model):
     external_id = models.IntegerField()
