@@ -47,6 +47,7 @@ LOCAL_APPS = (
     'spistresci.users',  # custom users app
     'spistresci.products',
     'spistresci.stores',
+    'spistresci.datasource',
     # Your stuff: custom apps go here
 )
 

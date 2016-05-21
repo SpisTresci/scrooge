@@ -1,14 +1,15 @@
-from datetime import datetime
 import logging
+from datetime import datetime
 
 from django.db import models, transaction
 from django.utils.translation import ugettext_lazy as _
 
 from spistresci.products.models import Product
-from spistresci.stores.datasource.generic import DataSource
+from spistresci.datasource.generic import DataSource
+
 # noinspection PyUnresolvedReferences
 # statement used for autodiscover, TODO: replace with http://stackoverflow.com/questions/32335967/
-from spistresci.stores.datasource.specific import *
+from spistresci.datasource.specific import *
 
 logger = logging.getLogger(__name__)
 

@@ -1,8 +1,10 @@
-from test_plus.test import TestCase
 from unittest.mock import patch, Mock, MagicMock, call
-from spistresci.stores.datasource.generic import XmlDataSource
+
+from test_plus.test import TestCase
+
 from spistresci.stores.models import Store
 from spistresci.stores.utils.datastoragemanager import DataStorageManager
+from spistresci.datasource.generic import XmlDataSource
 
 
 class TestXmlDataSource(TestCase):
@@ -13,8 +15,8 @@ class TestXmlDataSource(TestCase):
     def test_default_data_source_is_instance_of_XmlDataSource(self):
         self.assertIsInstance(self.store.data_source(), XmlDataSource)
 
-    @patch('spistresci.stores.datasource.generic.DataStorageManager')
-    @patch('spistresci.stores.datasource.generic.urlopen')
+    @patch('spistresci.datasource.generic.DataStorageManager')
+    @patch('spistresci.datasource.generic.urlopen')
     def test_fetch_and_save_data_to_storage_manager(self, urlopen, data_storage_manager):
         mocked_response = Mock()
         mocked_response.read.side_effect = [b'data1', b'data1', None]
@@ -28,7 +30,7 @@ class TestXmlDataSource(TestCase):
         data_storage_manager.return_value.save.assert_has_calls([call('foo.xml')])
 
     @patch('spistresci.stores.models.Store.update_products')
-    @patch('spistresci.stores.datasource.generic.DataStorageManager')
+    @patch('spistresci.datasource.generic.DataStorageManager')
     def test_update_should_update_data_only_if_new_revision_is_available(self, data_storage_manager, update_products):
         self.store.last_update_revision = 42
         self.store.save()
@@ -43,7 +45,7 @@ class TestXmlDataSource(TestCase):
         self.store.update()
         update_products.assert_called_once_with(revision_number=43, added=[], deleted=[], modified=[])
 
-    @patch('spistresci.stores.datasource.generic.DataStorageManager')
+    @patch('spistresci.datasource.generic.DataStorageManager')
     def test_update_passes_no_revision_exception_if_there_is_no_data_in_ds(self, data_storage_manager):
         data_storage_manager.return_value.last_revision_number.side_effect = DataStorageManager.NoRevision()
 
@@ -54,7 +56,7 @@ class TestXmlDataSource(TestCase):
 class TestUpdateOfXmlDataSource(TestCase):
 
     def setUp(self):
-        self.patcher1 = patch('spistresci.stores.datasource.generic.DataStorageManager')
+        self.patcher1 = patch('spistresci.datasource.generic.DataStorageManager')
         self.patcher2 = patch('spistresci.stores.models.Store.update_products')
         self.addCleanup(self.patcher1.stop)
         self.addCleanup(self.patcher2.stop)
@@ -205,9 +207,9 @@ class TestUpdateOfXmlDataSource(TestCase):
             self.store.update()
 
         self.assertEqual(cm.output, [
-            'WARNING:spistresci.stores.datasource.generic:[Store:Foo] Product with external_id "3" is not unique!',
-            'WARNING:spistresci.stores.datasource.generic:[Store:Foo] Product with external_id "4" is not unique!',
-            'WARNING:spistresci.stores.datasource.generic:[Store:Foo] Product with external_id "4" is not unique!'
+            'WARNING:spistresci.datasource.generic:[Store:Foo] Product with external_id "3" is not unique!',
+            'WARNING:spistresci.datasource.generic:[Store:Foo] Product with external_id "4" is not unique!',
+            'WARNING:spistresci.datasource.generic:[Store:Foo] Product with external_id "4" is not unique!'
         ])
 
         expected = {

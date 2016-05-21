@@ -1,4 +1,4 @@
-from spistresci.stores.datasource.generic import XmlDataSource
+from spistresci.datasource.generic import XmlDataSource
 
 
 class Publio(XmlDataSource):
