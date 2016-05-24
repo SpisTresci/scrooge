@@ -6,18 +6,10 @@ from django.utils.translation import ugettext_lazy as _
 
 from spistresci.products.models import Product
 from spistresci.datasource.generic import DataSource
+from spistresci.datasource.models import XmlDataSource as DataSourceModel
 
-# noinspection PyUnresolvedReferences
-# statement used for autodiscover, TODO: replace with http://stackoverflow.com/questions/32335967/
-from spistresci.datasource.specific import *
 
 logger = logging.getLogger(__name__)
-
-
-def get_data_source_classes():  # TODO: Move to utils
-    subclasses = sorted(DataSource.get_all_subclasses().keys())
-    assert 'XmlDataSource' in subclasses  # XmlDataSource is default, so we want to make sure it is available
-    return zip(subclasses, subclasses)
 
 
 class Store(models.Model):
@@ -28,17 +20,6 @@ class Store(models.Model):
     name = models.CharField(_('Store name'), max_length=32)
     url = models.URLField(_('Store url address'))
     last_update_revision = models.IntegerField(null=True)
-
-    SINGLE_XML = 1
-
-    DATA_SOURCE_TYPE_CHOICES = (
-        (SINGLE_XML, _('Single XML')),
-    )
-
-    data_source_type = models.IntegerField(_('Data source type'), choices=DATA_SOURCE_TYPE_CHOICES, default=SINGLE_XML)
-    data_source_url = models.URLField(_('URL address of data source'), default=None, blank=False)
-    data_source_class = models.CharField(max_length=32, choices=get_data_source_classes(), default='XmlDataSource')
-
     last_successful_update = models.DateTimeField(_('Time of last successful update'), default=None, null=True)
     last_changing_products_update = models.DateTimeField(
         _('Time of last successful update which changed any product'),
