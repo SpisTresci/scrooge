@@ -1,6 +1,7 @@
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 
+from spistresci.datasource.generic import XmlDataSourceImpl
 from spistresci.datasource.utils import get_data_source_classes
 
 # noinspection PyUnresolvedReferences
@@ -30,6 +31,10 @@ class DataSourceModel(models.Model):
         get_subclasses(subclasses, DataSourceModel)
 
         return subclasses
+
+    @property
+    def impl_class(self):
+        return NotImplemented
 
     @property
     def child(self):
@@ -70,8 +75,15 @@ class XmlDataSourceModel(DataSourceModel):
 
     type = models.IntegerField(_('Data source type'), choices=DATA_SOURCE_TYPE_CHOICES, default=SINGLE_XML)
     url = models.URLField(_('URL address of data source'), default=None, blank=False)
-    custom_class = models.CharField(max_length=32, choices=get_data_source_classes(), default='XmlDataSource')
+    custom_class = models.CharField(max_length=32, choices=get_data_source_classes(), default='XmlDataSourceImpl')
 
+    @property
+    def impl_class(self):
+        return XmlDataSourceImpl
+
+    @property
+    def fields(self):
+        return XmlDataField.objects.filter(data_source=self)
 
     def __str__(self):
         return '{} - class {}'.format(self.name, self.custom_class)
@@ -79,8 +91,12 @@ class XmlDataSourceModel(DataSourceModel):
 
 
 class XmlDataField(models.Model):
+
+    # TODO: make sure, that user cannot create field with name 'data'.
+
     name = models.CharField(_('Name of field'), max_length=32)
     xpath = models.CharField(_('xpath needed to extract value of field'), max_length=256)
+    default_value = models.CharField(_('Default value'), max_length=32, default='', blank=True)
     data_source = models.ForeignKey(XmlDataSourceModel)
 
     def __str__(self):

@@ -8,7 +8,7 @@ from spistresci.stores.utils.datastoragemanager import DataStorageManager
 logger = logging.getLogger(__name__)
 
 
-class DataSource:
+class DataSourceImpl:
 
     def __init__(self, store):
         self.store = store
@@ -23,13 +23,13 @@ class DataSource:
         subclasses = {}
 
         def get_subclasses(subclasses, cls):
-            if cls.__name__ != DataSource.__name__:
+            if cls.__name__ != DataSourceImpl.__name__:
                 subclasses[cls.__name__] = cls
 
             for subclass in cls.__subclasses__():
                 get_subclasses(subclasses, subclass)
 
-        get_subclasses(subclasses, DataSource)
+        get_subclasses(subclasses, DataSourceImpl)
 
         return subclasses
 
@@ -62,7 +62,7 @@ class DataSource:
             logger.info('[Store:{}] There are no new revision available!')
 
 
-class XmlDataSource(DataSource):
+class XmlDataSourceImpl(DataSourceImpl):
 
     def fetch(self, headers=None):
         """
@@ -70,12 +70,13 @@ class XmlDataSource(DataSource):
         this data with data_storage_manage, from where this data
         can be retrieved later by providing name and filename
         """
+        data_source_url = self.store.data_source.child.url
 
-        logger.info('[Store:{}] Fetching data from {}'.format(self.store.name, self.store.data_source_url))
+        logger.info('[Store:{}] Fetching data from {}'.format(self.store.name, data_source_url))
 
         filename = '{}.xml'.format(self.store.name.lower())
 
-        request = Request(self.store.data_source_url, headers=headers or {})
+        request = Request(data_source_url, headers=headers or {})
         response = urlopen(request)
 
         chunk_size = 16 * 1024
@@ -144,8 +145,20 @@ class XmlDataSource(DataSource):
     # code below is inherited from SpisTresci 1.0. Refactor is welcome :)
 
     xml_tag_dict = None
-    xmls_namespace = ''
-    depth = 0
+
+    @property
+    def xml_tag_dict(self):
+        return {
+            field.name: (field.xpath, '')
+            for field in self.store.data_source.child.fields
+        }
+
+    @property
+    def depth(self):
+        return self.store.data_source.child.depth
+
+    xmls_namespace = '' # TODO: move to the model
+
 
     def _get_product_list(self, file_content):
         logger.info('[Store:{}] Parsing XML...'.format(self.store.name))

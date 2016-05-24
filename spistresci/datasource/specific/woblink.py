@@ -1,7 +1,7 @@
-from spistresci.datasource.generic import XmlDataSource
+from spistresci.datasource.generic import XmlDataSourceImpl
 
 
-class Woblink(XmlDataSource):
+class Woblink(XmlDataSourceImpl):
     depth = 1
 
     xml_tag_dict = {

@@ -1,7 +1,7 @@
-from spistresci.datasource.generic import DataSource
+from spistresci.datasource.generic import DataSourceImpl
 
 
 def get_data_source_classes():
-    subclasses = sorted(DataSource.get_all_subclasses().keys())
-    assert 'XmlDataSource' in subclasses  # XmlDataSource is default, so we want to make sure it is available
+    subclasses = sorted(DataSourceImpl.get_all_subclasses().keys())
+    assert 'XmlDataSourceImpl' in subclasses  # XmlDataSourceImpl is default, so we want to make sure it is available
     return zip(subclasses, subclasses)

@@ -1,7 +1,7 @@
-from spistresci.datasource.generic import XmlDataSource
+from spistresci.datasource.generic import XmlDataSourceImpl
 
 
-class Publio(XmlDataSource):
+class Publio(XmlDataSourceImpl):
     xml_tag_dict = {
         'external_id': ('./id', ''),
         'title': ('./title', ''),

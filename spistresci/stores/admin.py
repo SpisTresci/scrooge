@@ -30,11 +30,10 @@ def get_last_changing_products_update(obj):
 get_last_changing_products_update.short_description = 'Product(s) changed last time'
 
 
-def get_data_source_class(obj):
-    name = obj.data_source_class
-    return 'Generic: XmlDataSource' if name == 'XmlDataSource' else 'Custom: ' + name
+def get_data_source(obj):
+    return '{}, class {}'.format(obj.data_source.name, obj.data_source.child.__class__.__name__)
 
-get_data_source_class.short_description = 'Data Source Class'
+get_data_source.short_description = 'Data Source'
 
 
 class StoreAdmin(admin.ModelAdmin):
@@ -44,7 +43,7 @@ class StoreAdmin(admin.ModelAdmin):
         get_number_of_products,
         get_last_successful_update,
         get_last_changing_products_update,
-        get_data_source_class
+        get_data_source
     )
 
     def get_readonly_fields(self, request, obj=None):

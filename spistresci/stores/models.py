@@ -5,7 +5,7 @@ from django.db import models, transaction
 from django.utils.translation import ugettext_lazy as _
 
 from spistresci.products.models import Product
-from spistresci.datasource.generic import DataSource
+from spistresci.datasource.generic import DataSourceImpl
 from spistresci.datasource.models import DataSourceModel
 
 
@@ -28,19 +28,17 @@ class Store(models.Model):
     )
     data_source = models.ForeignKey(DataSourceModel)
 
-
-    # def data_source(self):
-    #     data_source_class = DataSource.get_all_subclasses()[self.data_source_class]
-    #     return data_source_class(self)v
+    def data_source_instance(self):
+        return self.data_source.child.impl_class(self)
 
     def __str__(self):
         return '{} - {}'.format(self.name, self.url)
 
-    # def update(self):
-    #     self.data_source().update()
-    #
-    # def fetch(self):
-    #     self.data_source().fetch()
+    def update(self):
+        self.data_source_instance().update()
+
+    def fetch(self):
+        self.data_source_instance().fetch()
 
     def update_products(self, revision_number, added=None, deleted=None, modified=None):
         added = added or []

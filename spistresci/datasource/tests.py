@@ -4,7 +4,7 @@ from test_plus.test import TestCase
 
 from spistresci.stores.models import Store
 from spistresci.stores.utils.datastoragemanager import DataStorageManager
-from spistresci.datasource.generic import XmlDataSource
+from spistresci.datasource.generic import XmlDataSourceImpl
 
 
 class TestXmlDataSource(TestCase):
@@ -13,7 +13,7 @@ class TestXmlDataSource(TestCase):
         self.store = Store.objects.create(name='Foo', url='http://foo.com/', data_source_url='http://foo.com/xml')
 
     def test_default_data_source_is_instance_of_XmlDataSource(self):
-        self.assertIsInstance(self.store.data_source(), XmlDataSource)
+        self.assertIsInstance(self.store.data_source(), XmlDataSourceImpl)
 
     @patch('spistresci.datasource.generic.DataStorageManager')
     @patch('spistresci.datasource.generic.urlopen')
@@ -78,7 +78,7 @@ class TestUpdateOfXmlDataSource(TestCase):
 
         self.data_storage_manager.return_value.get.side_effect = lambda f, rev: self.rev0 if rev == 0 else self.rev1
 
-        XmlDataSource.xml_tag_dict = {
+        XmlDataSourceImpl.xml_tag_dict = {
             'external_id': ('./id', ''),
             'title': ('./title', ''),
         }
