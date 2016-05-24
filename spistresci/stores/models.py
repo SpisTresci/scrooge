@@ -6,7 +6,7 @@ from django.utils.translation import ugettext_lazy as _
 
 from spistresci.products.models import Product
 from spistresci.datasource.generic import DataSource
-from spistresci.datasource.models import XmlDataSource as DataSourceModel
+from spistresci.datasource.models import DataSourceModel
 
 
 logger = logging.getLogger(__name__)
@@ -26,19 +26,21 @@ class Store(models.Model):
         default=None,
         null=True
     )
+    data_source = models.ForeignKey(DataSourceModel)
 
-    def data_source(self):
-        data_source_class = DataSource.get_all_subclasses()[self.data_source_class]
-        return data_source_class(self)
+
+    # def data_source(self):
+    #     data_source_class = DataSource.get_all_subclasses()[self.data_source_class]
+    #     return data_source_class(self)v
 
     def __str__(self):
         return '{} - {}'.format(self.name, self.url)
 
-    def update(self):
-        self.data_source().update()
-
-    def fetch(self):
-        self.data_source().fetch()
+    # def update(self):
+    #     self.data_source().update()
+    #
+    # def fetch(self):
+    #     self.data_source().fetch()
 
     def update_products(self, revision_number, added=None, deleted=None, modified=None):
         added = added or []

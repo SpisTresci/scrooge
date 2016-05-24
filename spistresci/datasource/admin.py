@@ -3,28 +3,27 @@ from django import forms
 from django.core.urlresolvers import reverse
 from django.forms.widgets import Textarea
 
-from spistresci.datasource.models import XmlDataSource
-from spistresci.datasource.models import XmlDataField
+from spistresci.datasource.models import DataSourceModel, XmlDataSourceModel, XmlDataField
 
 
 class XmlDataSourceAdminForm(forms.ModelForm):
-    data_fields = forms.CharField(widget=Textarea)
+    data_fields = forms.CharField(widget=Textarea, required=False)
 
     def __init__(self, *args, **kwargs):
         instance = kwargs.get('instance')
         if instance:
             data_fields = XmlDataField.objects.filter(data_source=instance)
             self.base_fields['data_fields'].initial = '\n'.join([str(field) for field in data_fields])
-            self.base_fields['data_fields'].widget.attrs['disabled'] = True
 
+        self.base_fields['data_fields'].widget.attrs['disabled'] = True
         forms.ModelForm.__init__(self, *args, **kwargs)
 
     class Meta:
-        model = XmlDataSource
+        model = XmlDataSourceModel
         fields = "__all__"
 
 
-class XmlDataSourceAdmin(admin.ModelAdmin):
+class XmlDataSourceModelAdmin(admin.ModelAdmin):
     form = XmlDataSourceAdminForm
 
 
@@ -41,5 +40,6 @@ class XmlDataFieldAdmin(admin.ModelAdmin):
     list_display = ('name', 'xpath', get_data_source,)
 
 
-admin.site.register(XmlDataSource, XmlDataSourceAdmin)
+admin.site.register(DataSourceModel)
+admin.site.register(XmlDataSourceModel, XmlDataSourceModelAdmin)
 admin.site.register(XmlDataField, XmlDataFieldAdmin)

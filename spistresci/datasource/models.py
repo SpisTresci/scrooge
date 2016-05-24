@@ -9,7 +9,42 @@ from spistresci.datasource.utils import get_data_source_classes
 from spistresci.datasource.specific import *
 
 
-class XmlDataSource(models.Model):
+class DataSourceModel(models.Model):
+    name = models.CharField(_('Name'), max_length=32)
+
+    @staticmethod
+    def get_all_subclasses():
+        """
+        Returns all subclasses, not only direct subclasses, but also
+        all subclasses of subclasses, and so on.
+        """
+        subclasses = {}
+
+        def get_subclasses(subclasses, cls):
+            if cls.__name__ != DataSourceModel.__name__:
+                subclasses[cls.__name__] = cls
+
+            for subclass in cls.__subclasses__():
+                get_subclasses(subclasses, subclass)
+
+        get_subclasses(subclasses, DataSourceModel)
+
+        return subclasses
+
+    @property
+    def child(self):
+        data_source_field_names = [name.lower() for name in self.get_all_subclasses().keys()]
+        for field_name in data_source_field_names:
+            child = getattr(self, field_name)
+            if child:
+                return child
+
+    def __str__(self):
+        return str(self.child)
+
+
+
+class XmlDataSourceModel(DataSourceModel):
     """
     Example of XML file with depth 1:
     <root>
@@ -25,7 +60,6 @@ class XmlDataSource(models.Model):
         </group>
     </root>
     """
-    name = models.CharField(_('Name'), max_length=32)
     depth = models.IntegerField(_('On which level offers are located'))
 
     SINGLE_XML = 1
@@ -47,7 +81,7 @@ class XmlDataSource(models.Model):
 class XmlDataField(models.Model):
     name = models.CharField(_('Name of field'), max_length=32)
     xpath = models.CharField(_('xpath needed to extract value of field'), max_length=256)
-    data_source = models.ForeignKey(XmlDataSource, null=True)
+    data_source = models.ForeignKey(XmlDataSourceModel)
 
     def __str__(self):
         return '{} - {}'.format(self.name, self.xpath)
