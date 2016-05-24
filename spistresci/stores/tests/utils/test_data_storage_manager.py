@@ -57,6 +57,25 @@ class TestDataStorageManager(TestCase):
             with self.assertRaises(DataStorageManager.NoFile):
                 ds_manager.get('other_file.xml')
 
+    def test_get_returns_proper_revision(self):
+        with override_settings(ST_STORES_DATA_DIR=self.temp_dir.name):
+            ds_manager = DataStorageManager(self._func_name())
+
+            for rev in range(10):
+                with ds_manager.save('file.xml') as buffer:
+                    buffer.write('file content {}'.format(rev).encode())
+
+                self.assertEqual(ds_manager.last_revision_number(), rev)
+
+            for rev in range(10):
+                self.assertEqual(
+                    'file content {}'.format(rev),
+                    ds_manager.get('file.xml', rev)
+                )
+
+            # without rev argument, last revision should be returned
+            self.assertEqual('file content 9', ds_manager.get('file.xml'))
+
     def test_last_revision_number_raises_no_revisions_at_the_beginning(self):
         with override_settings(ST_STORES_DATA_DIR=self.temp_dir.name):
             ds_manager = DataStorageManager(self._func_name())
