@@ -19,7 +19,7 @@ class Store(models.Model):
     )
     name = models.CharField(_('Store name'), max_length=32)
     url = models.URLField(_('Store url address'))
-    last_update_revision = models.IntegerField(null=True)
+    last_update_revision = models.IntegerField(null=True, default=None)
     last_successful_update = models.DateTimeField(_('Time of last successful update'), default=None, null=True)
     last_changing_products_update = models.DateTimeField(
         _('Time of last successful update which changed any product'),

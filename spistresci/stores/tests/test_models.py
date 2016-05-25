@@ -11,7 +11,7 @@ class TestStore(TestCase):
 
     def setUp(self):
         data_source = XmlDataSourceModel.objects.create(name='Foo', depth=0, url='http://foo.com/xml')
-        self.store = Store.objects.create(name='Foo', data_source=data_source, last_update_revision=None)
+        self.store = Store.objects.create(name='Foo', data_source=data_source)
 
     def test_update_products__update_revision_number(self):
         self.assertEqual(self.store.last_update_revision, None)
