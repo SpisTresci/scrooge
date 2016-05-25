@@ -3,6 +3,7 @@ from test_plus.test import TestCase
 
 from django.core.management import call_command
 
+from spistresci.datasource.models import XmlDataSourceModel
 from spistresci.stores.models import Store
 
 
@@ -11,13 +12,17 @@ from spistresci.stores.models import Store
 class TestUpdateStoreProducts(TestCase):
 
     def setUp(self):
+        foo_ds = XmlDataSourceModel.objects.create(name='Foo', depth=0, url='http://foo.com/xml')
+        bar_ds = XmlDataSourceModel.objects.create(name='Bar', depth=0, url='http://bar.com/xml')
+        baz_ds = XmlDataSourceModel.objects.create(name='Baz', depth=0, url='http://baz.com/xml')
+        qux_ds = XmlDataSourceModel.objects.create(name='Qux', depth=0, url='http://qux.com/xml')
+
         Store.objects.bulk_create(
             Store(**kwargs) for kwargs in [
-                {'name': 'Foo', 'enabled': True, 'url': 'http://foo.com/', 'data_source_url': 'http://foo.com/xml'},
-                {'name': 'Bar', 'enabled': True, 'url': 'http://bar.com/', 'data_source_url': 'http://bar.com/xml'},
-                {'name': 'Baz', 'enabled': False, 'url': 'http://baz.com/', 'data_source_url': 'http://baz.com/xml'},
-                {'name': 'Qux', 'enabled': True, 'url': 'http://qux.com/', 'data_source_url': 'http://qux.com/xml'},
-
+                {'name': 'Foo', 'enabled': True, 'url': 'http://foo.com/', 'data_source': foo_ds},
+                {'name': 'Bar', 'enabled': True, 'url': 'http://bar.com/', 'data_source': bar_ds},
+                {'name': 'Baz', 'enabled': False, 'url': 'http://baz.com/', 'data_source': baz_ds},
+                {'name': 'Qux', 'enabled': True, 'url': 'http://qux.com/', 'data_source': qux_ds},
             ]
         )
 

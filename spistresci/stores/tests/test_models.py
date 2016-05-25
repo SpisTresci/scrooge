@@ -2,6 +2,7 @@ from decimal import Decimal
 from django.db.utils import IntegrityError
 from test_plus.test import TestCase
 
+from spistresci.datasource.models import XmlDataSourceModel
 from spistresci.products.models import Product
 from spistresci.stores.models import Store
 
@@ -9,7 +10,8 @@ from spistresci.stores.models import Store
 class TestStore(TestCase):
 
     def setUp(self):
-        self.store = Store.objects.create(name='Foo', url='http://foo.com/', data_source_url='http://foo.com/xml')
+        data_source = XmlDataSourceModel.objects.create(name='Foo', depth=0, url='http://foo.com/xml')
+        self.store = Store.objects.create(name='Foo', data_source=data_source, last_update_revision=None)
 
     def test_update_products__update_revision_number(self):
         self.assertEqual(self.store.last_update_revision, None)
