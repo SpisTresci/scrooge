@@ -1,45 +1,66 @@
 from django.contrib import admin
-from django import forms
-from django.core.urlresolvers import reverse
-from django.forms.widgets import Textarea
+from django.db.models.fields import NOT_PROVIDED
+from django.forms import ValidationError
+from django.forms.models import BaseInlineFormSet
 
-from spistresci.datasource.models import DataSourceModel, XmlDataSourceModel, XmlDataField
+from spistresci.datasource.models import XmlDataSourceModel, XmlDataField
+from spistresci.products.models import Product
 
 
-class XmlDataSourceAdminForm(forms.ModelForm):
-    data_fields = forms.CharField(widget=Textarea, required=False)
+class RequiredInlineFormSet(BaseInlineFormSet):
+    initial_data = [
+        {'name': field.name}
+        for field in Product._meta.fields
+        if field.default == NOT_PROVIDED and field.name not in ['id', 'store']
+    ]
+
+    def _construct_form(self, i, **kwargs):
+        form = super(RequiredInlineFormSet, self)._construct_form(i, **kwargs)
+        if 'name' in form.initial and form.initial['name'] in [initial['name'] for initial in self.initial_data]:
+            form.fields['name'].disabled = True
+
+        self.can_delete = False
+        return form
 
     def __init__(self, *args, **kwargs):
-        instance = kwargs.get('instance')
-        if instance:
-            data_fields = instance.fields
-            self.base_fields['data_fields'].initial = '\n'.join([str(field) for field in data_fields])
+        super(RequiredInlineFormSet, self).__init__(*args, **kwargs)
+        if not kwargs['instance'].pk:
+            self.initial = self.initial_data
 
-        self.base_fields['data_fields'].widget.attrs['disabled'] = True
-        forms.ModelForm.__init__(self, *args, **kwargs)
+    def get_queryset(self):
+        return super(RequiredInlineFormSet, self).get_queryset().filter(name__in=['external_id', 'title'])
 
-    class Meta:
-        model = XmlDataSourceModel
-        fields = "__all__"
+
+class NotRequiredInlineFormSet(BaseInlineFormSet):
+    def clean(self):
+        super(NotRequiredInlineFormSet, self).clean()
+        for form in self.forms:
+            if form.cleaned_data and form.cleaned_data.get('name', '') == 'data':
+                raise ValidationError("Name 'data' is forbidden. Use different name.")
+
+    def get_queryset(self):
+        return super(NotRequiredInlineFormSet, self).get_queryset().exclude(name__in=['external_id', 'title'])
+
+
+class XmlDataRequiredFieldInline(admin.TabularInline):
+    model = XmlDataField
+    formset = RequiredInlineFormSet
+    max_num = len(RequiredInlineFormSet.initial_data)
+    min_num = len(RequiredInlineFormSet.initial_data)
+    extra = 0
+    verbose_name = "Required Xml Data Field"
+    verbose_name_plural = "Required Xml Data Fields"
+
+
+class XmlDataNotRequiredFieldInline(admin.TabularInline):
+    extra = 1
+    model = XmlDataField
+    formset = NotRequiredInlineFormSet
+    verbose_name = "Additional Xml Data Field"
+    verbose_name_plural = "Additional Xml Data Fields"
 
 
 class XmlDataSourceModelAdmin(admin.ModelAdmin):
-    form = XmlDataSourceAdminForm
+    inlines = [XmlDataRequiredFieldInline, XmlDataNotRequiredFieldInline]
 
-
-def get_data_source(obj):
-    return '<a href="{}">{}</a>'.format(
-        reverse('admin:datasource_xmldatasourcemodel_change', args=(obj.data_source.id,)),
-        obj.data_source.name
-    )
-get_data_source.allow_tags = True
-get_data_source.admin_order_field = 'data_source__name'
-
-
-class XmlDataFieldAdmin(admin.ModelAdmin):
-    list_display = ('name', 'xpath', 'default_value', get_data_source,)
-
-
-admin.site.register(DataSourceModel)
 admin.site.register(XmlDataSourceModel, XmlDataSourceModelAdmin)
-admin.site.register(XmlDataField, XmlDataFieldAdmin)
