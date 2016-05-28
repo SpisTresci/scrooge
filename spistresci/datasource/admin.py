@@ -7,12 +7,20 @@ from spistresci.datasource.models import XmlDataSourceModel, XmlDataField
 from spistresci.products.models import Product
 
 
-class RequiredInlineFormSet(BaseInlineFormSet):
-    initial_data = [
+def dict_of_fields_without_default():
+    return [
         {'name': field.name}
         for field in Product._meta.fields
         if field.default == NOT_PROVIDED and field.name not in ['id', 'store']
     ]
+
+
+def list_of_fields_without_default():
+    return [field['name'] for field in dict_of_fields_without_default()]
+
+
+class RequiredInlineFormSet(BaseInlineFormSet):
+    initial_data = dict_of_fields_without_default()
 
     def _construct_form(self, i, **kwargs):
         form = super(RequiredInlineFormSet, self)._construct_form(i, **kwargs)
@@ -28,7 +36,7 @@ class RequiredInlineFormSet(BaseInlineFormSet):
             self.initial = self.initial_data
 
     def get_queryset(self):
-        return super(RequiredInlineFormSet, self).get_queryset().filter(name__in=['external_id', 'title'])
+        return super(RequiredInlineFormSet, self).get_queryset().filter(name__in=list_of_fields_without_default())
 
 
 class NotRequiredInlineFormSet(BaseInlineFormSet):
@@ -39,7 +47,7 @@ class NotRequiredInlineFormSet(BaseInlineFormSet):
                 raise ValidationError("Name 'data' is forbidden. Use different name.")
 
     def get_queryset(self):
-        return super(NotRequiredInlineFormSet, self).get_queryset().exclude(name__in=['external_id', 'title'])
+        return super(NotRequiredInlineFormSet, self).get_queryset().exclude(name__in=list_of_fields_without_default())
 
 
 class XmlDataRequiredFieldInline(admin.TabularInline):

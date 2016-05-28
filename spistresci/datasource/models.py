@@ -101,9 +101,9 @@ class XmlDataField(models.Model):
 
     # TODO: make sure, that user cannot create field with name 'data'.
 
-    name = models.CharField(_('Name of field'), max_length=32)
-    xpath = models.CharField(_('xpath needed to extract value of field'), max_length=256)
-    default_value = models.CharField(_('Default value'), max_length=32, default='', blank=True)
+    name = models.CharField(max_length=32)
+    xpath = models.CharField(help_text=_('Relative xpath needed to extract value of field'), max_length=256)
+    default_value = models.CharField(max_length=32, default='', blank=True)
     data_source = models.ForeignKey(XmlDataSourceModel)
 
     def __str__(self):

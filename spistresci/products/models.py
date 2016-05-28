@@ -6,13 +6,13 @@ from django.utils.translation import ugettext_lazy as _
 
 
 class Product(models.Model):
-    external_id = models.IntegerField()
-    title = models.CharField(_('Title of Product'), max_length=255)
-    url = models.URLField(max_length=2048, default='')
-
     store = models.ForeignKey('stores.Store')
 
-    price = models.DecimalField(max_digits=8, decimal_places=2, default=Decimal(0.00))
+    external_id = models.IntegerField()
+    title = models.CharField(_('Title of Product'), max_length=255)
+    url = models.URLField(max_length=2048)
+    price = models.DecimalField(max_digits=8, decimal_places=2)
+
     data = JSONField(default=dict)
 
     class Meta:
