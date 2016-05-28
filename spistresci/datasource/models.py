@@ -50,29 +50,32 @@ class DataSourceModel(models.Model):
         return str(self.child)
 
 
-
 class XmlDataSourceModel(DataSourceModel):
-    depth = models.IntegerField(
-        help_text=_(textwrap.dedent("""
-            Depth describes on which level offers are located.
 
-            Example of XML with depth 0:
+    offers_root_xpath = models.CharField(
+        max_length=64,
+        help_text=_(textwrap.dedent("""
+            XPath to element which children are offers elements.
+
+            For document below, that would be /root
             <root>
-              <product></product>
-              <product></product>
+              <book></book>
+              <book></book>
             </root>
 
-            Example of XML with depth 1:
+            and in that case, that would be /root/offers
             <root>
-              <group>
-                <product></product>
-                <product></product>
-              </group>
+              <store>
+                <location></location>
+              <store>
+              <offers>
+                <offer></offer>
+                <offer></offer>
+              </offers>
             </root>
             """)
         ).replace('<', '&lt;').replace('>', '&gt;').replace(' ', '&nbsp;').replace('\n', '<br />')
     )
-
 
     SINGLE_XML = 1
 
