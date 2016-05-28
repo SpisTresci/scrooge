@@ -28,28 +28,30 @@ Name
 XMLDataSource
 -------------
 
-Depth
-    Depth describe on which level offers are located.
+Offers root xpath
+    XPath to element which children are offers elements.
 
-    Example of XML with depth 0:
-    
-    .. code-block:: html
-    
+    For document below, that would be ``/root``
+
+    .. code-block:: html    
+
         <root>
-            <product></product>
-            <product></product>
+            <book></book>
+            <book></book>
         </root>
 
+    and in that case, that would be ``/root/offers``
 
-    Example of XML with depth 1:
-    
-    .. code-block:: html
-    
+    .. code-block:: html    
+
         <root>
-          <group>
-            <product></product>
-            <product></product>
-          </group>
+            <store>
+                <location></location>
+            <store>
+            <offers>
+                <offer></offer>
+                <offer></offer>
+            </offers>
         </root>
 
 Data Source type
@@ -68,8 +70,8 @@ Custom Class
     
 .. _spistresci/datasource/specific: ../../spistresci/datasource/specific/
 
-XML Data Fields
----------------
+XMLDataFields
+-------------
 
 Required XML Data Fields
     .. image:: images/datasource_required_xmldatafields.png
@@ -97,4 +99,55 @@ Additional XML Data Fields
     For example, to store information about *size* of product in your database, just create new field with name *size* (or 'dimensions' if you prefer - name of property do not have to be exactly the same as it is in XML document of specific store). You will be able to fetch all additional data stored in database via API.
 
     
+XMLDataFields - XPath
+---------------------
+
+XPath (`XML Path Language`_) is a best way to specify how to exctract data from XML document. Let's take a look on few examples. Having fallowing XML Document:
+
+.. _XML Path Language: https://en.wikipedia.org/wiki/XPath
+.. code-block:: html
+    
+    <document>
+      <company>
+        <ceo>Elon Musk</ceo>
+        <employees>13058</employees>
+        <address>
+          <city>Palo Alto</city>
+          <state>California</state>
+          <country>USA</country>
+        </address>
+      </company>
+      <products>
+        <product>
+          <id>2</id>
+          <model>Tesla Model S</model>
+          <price>63400.00</price>
+          <productUrl>https://www.teslamotors.com/models</productUrl>
+          <imageUrl>https://www.teslamotors.com/tesla_theme/assets/img/models/section-initial.jpg</imageUrl>
+        </product>
+        <product>
+          <id>3</id>
+          <model>Tesla Model X</model>
+          <price>69300.00</price>
+          <productUrl>https://www.teslamotors.com/modelx</productUrl>
+          <imageUrl>https://www.teslamotors.com/tesla_theme/assets/img/modelx/section-exterior-profile.jpg</imageUrl>
+        </product>
+        <product>
+          <id>4</id>
+          <model>Tesla Model 3</model>
+          <price>35000.00</price>
+          <productUrl>https://www.teslamotors.com/model3</productUrl>
+          <imageUrl>https://www.teslamotors.com/sites/default/files/images/model-3/gallery/gallery-1.jpg</imageUrl>
+        </product>
+      </products>
+    </document>
+
+with xpath ``/document/products/product/model`` you will get ``['Tesla Model S', 'Tesla Model X', 'Tesla Model 3']``, and similarly with ``/document/products/product/price`` you will get ``['63400.00', '69300.00', '35000.00']``.
+
+Because of the stracture of typical XML like this, ``/document/products/product/`` is redundant in that case in both xpaths above. Moreover, you **have to** specified this part as *offers xpath root* for XMLDataSource.
+Nevertheles, thanks to this for all *XML Data Fields* you can now specify relative (and shorter) xpaths: ``./model``, ``./price``.
+
+
+
+
 
