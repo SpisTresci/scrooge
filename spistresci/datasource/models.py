@@ -1,3 +1,5 @@
+import textwrap
+
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 
@@ -11,7 +13,7 @@ from spistresci.datasource.specific import *
 
 
 class DataSourceModel(models.Model):
-    name = models.CharField(_('Name'), max_length=32)
+    name = models.CharField(_('Name'), max_length=32, unique=True)
 
     @staticmethod
     def get_all_subclasses():
@@ -50,22 +52,27 @@ class DataSourceModel(models.Model):
 
 
 class XmlDataSourceModel(DataSourceModel):
-    """
-    Example of XML file with depth 1:
-    <root>
-        <product></product>
-        <product></product>
-    </root>
+    depth = models.IntegerField(
+        help_text=_(textwrap.dedent("""
+            Depth describes on which level offers are located.
 
-    Example of XML file with depth 2:
-    <root>
-        <group>
-            <product></product>
-            <product></product>
-        </group>
-    </root>
-    """
-    depth = models.IntegerField(_('On which level offers are located'))
+            Example of XML with depth 0:
+            <root>
+              <product></product>
+              <product></product>
+            </root>
+
+            Example of XML with depth 1:
+            <root>
+              <group>
+                <product></product>
+                <product></product>
+              </group>
+            </root>
+            """)
+        ).replace('<', '&lt;').replace('>', '&gt;').replace(' ', '&nbsp;').replace('\n', '<br />')
+    )
+
 
     SINGLE_XML = 1
 
@@ -74,7 +81,7 @@ class XmlDataSourceModel(DataSourceModel):
     )
 
     type = models.IntegerField(_('Data source type'), choices=DATA_SOURCE_TYPE_CHOICES, default=SINGLE_XML)
-    url = models.URLField(_('URL address of data source'), default=None, blank=False)
+    url = models.URLField(help_text=_('URL address of data source'), default=None, blank=False)
     custom_class = models.CharField(max_length=32, choices=get_data_source_classes(), default='XmlDataSourceImpl')
 
     @property
