@@ -71,30 +71,30 @@ Custom Class
 XML Data Fields
 ---------------
 
-    Required XML Data Fields
-        .. image:: images/datasource_required_xmldatafields.png
+Required XML Data Fields
+    .. image:: images/datasource_required_xmldatafields.png
+
+    Right now there are exactly four required *XML Data Fields* - *external_id*, *name*, *price*, *url*. That means that you have to provide information (by xpath), how to extract those product metadata. 
+    If *Store* which you want to add do not have any of *Required XML Data Fields*, there is no other way - you have to write your own *Custom Class* to hadle such weird case.
+
+    external_id
+        is an *id* of product which *Store* uses in own database to identify specific product (name of product is not the best candidate for being a unique identifier, because there can be multiple products with the same name).
+    name
+        Because products have to be presented somehow to users, that is why we need something like *name* for each product.
     
-        Right now there are exactly four required *XML Data Fields* - *external_id*, *name*, *price*, *url*. That means that you have to provide information (by xpath), how to extract those product metadata. 
-        If *Store* which you want to add do not have any of *Required XML Data Fields*, there is no other way - you have to write your own *Custom Class* to hadle such weird case.
-
-        external_id
-            is an *id* of product which *Store* uses in own database to identify specific product (name of product is not the best candidate for being a unique identifier, because there can be multiple products with the same name).
-        name
-            Because products have to be presented somehow to users, that is why we need something like *name* for each product.
-        
-        price
-            Each product should have own price. If some store distributes also some product for free, you can always set default value for price to `0`.
-        
-        url
-            We assume, that each product has own url, where you can find details about it.
+    price
+        Each product should have own price. If some store distributes also some product for free, you can always set default value for price to `0`.
+    
+    url
+        We assume, that each product has own url, where you can find details about it.
 
 
-    Additional XML Data Fields
-        .. image:: images/datasource_additional_xmldatafields.png
-        
-        The great news is that you can store any data about products in the database! :) The only thing which you have to do to is provide the *name* for the property, information how to extract value of this property from XML document (by *xpath*), and default value for property in case if some products will not have matadata for this specific field.
-        
-        For example, to store information about *size* of product in your database, just create new field with name *size* (or 'dimensions' if you prefer - name of property do not have to be exactly the same as it is in XML document of specific store). You will be able to fetch all additional data stored in database via API.
+Additional XML Data Fields
+    .. image:: images/datasource_additional_xmldatafields.png
+    
+    The great news is that you can store any data about products in the database! :) The only thing which you have to do to is provide the *name* for the property, information how to extract value of this property from XML document (by *xpath*), and default value for property in case if some products will not have matadata for this specific field.
+    
+    For example, to store information about *size* of product in your database, just create new field with name *size* (or 'dimensions' if you prefer - name of property do not have to be exactly the same as it is in XML document of specific store). You will be able to fetch all additional data stored in database via API.
 
     
 
