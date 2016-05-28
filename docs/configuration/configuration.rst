@@ -12,7 +12,7 @@ Defining new DataSource
 
 Right now matadata about products/offers can be imported from XML files. However architecture of SpisTresci supports multiple formats of input data. If you need a support for different format of API, please `create an Issue on our github`_. You can also provide a support for new formats on your own by providing custom classes which will be derived from `DataSourceModel`_ and `DataSourceImpl`_ classes.
 
-.. _create an Issue on our github: https://github.com/SpisTresci/SpisTresci/issues/new 
+.. _create an Issue on our github: https://github.com/SpisTresci/SpisTresci/issues/new
 .. _DataSourceModel: ../../spistresci/datasource/models.py
 .. _DataSourceImpl: ../../spistresci/datasource/generic.py
 
@@ -33,7 +33,7 @@ Offers root xpath
 
     For document below, that would be ``/root``
 
-    .. code-block:: html    
+    .. code-block:: html
 
         <root>
             <book></book>
@@ -42,7 +42,7 @@ Offers root xpath
 
     and in that case, that would be ``/root/offers``
 
-    .. code-block:: html    
+    .. code-block:: html
 
         <root>
             <store>
@@ -56,18 +56,18 @@ Offers root xpath
 
 Data Source type
     XMLDataSource is capable of extracting data not only from single XML file, but also from archives which contains multiple XML files. With *Data Source type* you can specify behaviour for file downloaded from specified *url*.
-    
-    Single XML 
+
+    Single XML
         The most basic case, when *Store* expose all products by single XML file as API
 
 Url
     Address from which data will fetched periodically
-    
+
 Custom Class
     Sometimes data provided by Store do not suit very well to assumptions which need to be made during design of database. For example, we assumed that each product has unique integer *id* in *Store* database, or each product has name no longer than 256 characters. For sure there are Stores, which can have products with even longer names, or Stores which have alphanumeric ids.
 
     In such cases, there is no other choice than write some additional code, which will handle those specific cases in desired way. You can find examples of such classes written in Python in `spistresci/datasource/specific`_ directory. Your new custom class should derived from *DataSourceImpl* (directly or indirectly).
-    
+
 .. _spistresci/datasource/specific: ../../spistresci/datasource/specific/
 
 XMLDataFields
@@ -76,29 +76,29 @@ XMLDataFields
 Required XML Data Fields
     .. image:: images/datasource_required_xmldatafields.png
 
-    Right now there are exactly four required *XML Data Fields* - *external_id*, *name*, *price*, *url*. That means that you have to provide information (by xpath), how to extract those product metadata. 
+    Right now there are exactly four required *XML Data Fields* - *external_id*, *name*, *price*, *url*. That means that you have to provide information (by xpath), how to extract those product metadata.
     If *Store* which you want to add do not have any of *Required XML Data Fields*, there is no other way - you have to write your own *Custom Class* to hadle such weird case.
 
     external_id
         is an *id* of product which *Store* uses in own database to identify specific product (name of product is not the best candidate for being a unique identifier, because there can be multiple products with the same name).
     name
         Because products have to be presented somehow to users, that is why we need something like *name* for each product.
-    
+
     price
         Each product should have own price. If some store distributes also some product for free, you can always set default value for price to `0`.
-    
+
     url
         We assume, that each product has own url, where you can find details about it.
 
 
 Additional XML Data Fields
     .. image:: images/datasource_additional_xmldatafields.png
-    
+
     The great news is that you can store any data about products in the database! :) The only thing which you have to do to is provide the *name* for the property, information how to extract value of this property from XML document (by *xpath*), and default value for property in case if some products will not have matadata for this specific field.
-    
+
     For example, to store information about *size* of product in your database, just create new field with name *size* (or 'dimensions' if you prefer - name of property do not have to be exactly the same as it is in XML document of specific store). You will be able to fetch all additional data stored in database via API.
 
-    
+
 XMLDataFields - XPath
 ---------------------
 
@@ -106,7 +106,7 @@ XPath (`XML Path Language`_) is a best way to specify how to exctract data from 
 
 .. _XML Path Language: https://en.wikipedia.org/wiki/XPath
 .. code-block:: html
-    
+
     <document>
       <company>
         <ceo>Elon Musk</ceo>
@@ -155,7 +155,8 @@ To overcome this problem in that case ``/document/products/product`` should be s
 
 Thanks to that, all *XML Data Field*'s xpaths can be simplified and replaced with relative xpaths. In that case that would be: ``./model``, ``./price``.
 
+Example of complete configuration
+---------------------------------
 
-
-
+.. image:: images/datasource_whole_configuration.png
 
