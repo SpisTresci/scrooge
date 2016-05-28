@@ -118,21 +118,26 @@ XPath (`XML Path Language`_) is a best way to specify how to exctract data from 
         </address>
       </company>
       <products>
-        <product>
+        <product avail="0">
+          <id>1</id>
+          <model>Tesla Roadster</model>
+          <imageUrl>https://www.teslamotors.com/sites/default/files/styles/blog-picture_2x_1400xvar_/public/0H8E6227_1.jpg</imageUrl>
+        </product>
+        <product avail="1">
           <id>2</id>
           <model>Tesla Model S</model>
           <price>63400.00</price>
           <productUrl>https://www.teslamotors.com/models</productUrl>
           <imageUrl>https://www.teslamotors.com/tesla_theme/assets/img/models/section-initial.jpg</imageUrl>
         </product>
-        <product>
+        <product avail="1">
           <id>3</id>
           <model>Tesla Model X</model>
           <price>69300.00</price>
           <productUrl>https://www.teslamotors.com/modelx</productUrl>
           <imageUrl>https://www.teslamotors.com/tesla_theme/assets/img/modelx/section-exterior-profile.jpg</imageUrl>
         </product>
-        <product>
+        <product avail="1">
           <id>4</id>
           <model>Tesla Model 3</model>
           <price>35000.00</price>
@@ -142,10 +147,13 @@ XPath (`XML Path Language`_) is a best way to specify how to exctract data from 
       </products>
     </document>
 
-with xpath ``/document/products/product/model`` you will get ``['Tesla Model S', 'Tesla Model X', 'Tesla Model 3']``, and similarly with ``/document/products/product/price`` you will get ``['63400.00', '69300.00', '35000.00']``.
+with xpath ``/document/products/product/model`` you will get ``['Tesla Roadster', 'Tesla Model S', 'Tesla Model X', 'Tesla Model 3']``, and similarly with ``/document/products/product/price`` you will get ``['63400.00', '69300.00', '35000.00']`` (please notice that we got only 3 prices, because 'Tesla Roadster' is not available and document do not describe it's price).
 
-Because of the stracture of typical XML like this, ``/document/products/product/`` is redundant in that case in both xpaths above. Moreover, you **have to** specified this part as *offers xpath root* for XMLDataSource.
-Nevertheles, thanks to this for all *XML Data Fields* you can now specify relative (and shorter) xpaths: ``./model``, ``./price``.
+Because of the structure of typical XML document like this, part ``/document/products/product`` may seem to be redundant. Actually, it is very important, because without it alghorithm would not know how to group extracted properties into properties of single offer.
+
+To overcome this problem in that case ``/document/products/product`` should be specified as *offers root xpath* for whole XMLDataSource.
+
+Thanks to that, all *XML Data Field*'s xpaths can be simplified and replaced with relative xpaths. In that case that would be: ``./model``, ``./price``.
 
 
 
