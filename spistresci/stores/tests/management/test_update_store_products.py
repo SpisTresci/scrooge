@@ -12,10 +12,10 @@ from spistresci.stores.models import Store
 class TestUpdateStoreProducts(TestCase):
 
     def setUp(self):
-        foo_ds = XmlDataSourceModel.objects.create(name='Foo', depth=0, url='http://foo.com/xml')
-        bar_ds = XmlDataSourceModel.objects.create(name='Bar', depth=0, url='http://bar.com/xml')
-        baz_ds = XmlDataSourceModel.objects.create(name='Baz', depth=0, url='http://baz.com/xml')
-        qux_ds = XmlDataSourceModel.objects.create(name='Qux', depth=0, url='http://qux.com/xml')
+        foo_ds = XmlDataSourceModel.objects.create(name='Foo', offers_xpath='/whatever', url='http://foo.com/xml')
+        bar_ds = XmlDataSourceModel.objects.create(name='Bar', offers_xpath='/whatever', url='http://bar.com/xml')
+        baz_ds = XmlDataSourceModel.objects.create(name='Baz', offers_xpath='/whatever', url='http://baz.com/xml')
+        qux_ds = XmlDataSourceModel.objects.create(name='Qux', offers_xpath='/whatever', url='http://qux.com/xml')
 
         Store.objects.bulk_create(
             Store(**kwargs) for kwargs in [

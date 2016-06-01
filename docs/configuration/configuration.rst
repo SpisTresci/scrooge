@@ -47,7 +47,7 @@ Offers root xpath
         <root>
             <store>
                 <location></location>
-            <store>
+            </store>
             <offers>
                 <offer></offer>
                 <offer></offer>

@@ -95,20 +95,20 @@ class XmlDataSourceImpl(DataSourceImpl):
 
         file_name = '{}.xml'.format(self.store.name.lower())
         file_content = self.ds_manager.get(file_name, revision)
-        unique_products = {}
+        unique_offers = {}
 
-        for product_xml_node in self._get_product_list(file_content):
-            product = self._make_dict(product_xml_node)
-            external_id = product['external_id']
+        for node in self._get_list_of_offers(file_content):
+            offer = self._node_to_dict(node)
+            external_id = offer['external_id']  # TODO: add exception - external_id is required
 
-            if external_id not in unique_products.keys():
-                unique_products[external_id] = product
+            if external_id not in unique_offers.keys():
+                unique_offers[external_id] = offer
             else:
                 logger.warning(
                     '[Store:{}] Product with external_id "{}" is not unique!'.format(self.store.name, external_id)
                 )
 
-        return list(unique_products.values())
+        return list(unique_offers.values())
 
     def _filter(self, products, prev_rev_number):
         logger.info(
@@ -142,78 +142,35 @@ class XmlDataSourceImpl(DataSourceImpl):
             'modified': products_modified,
         }
 
-    # code below is inherited from SpisTresci 1.0. Refactor is welcome :)
-
-    xml_tag_dict = None
-
-    @property
-    def xml_tag_dict(self):
-        return {
-            field.name: (field.xpath, '')
-            for field in self.store.data_source.child.fields
-        }
-
-    @property
-    def depth(self):
-        return self.store.data_source.child.depth
-
-    xmls_namespace = '' # TODO: move to the model
-
-
-    def _get_product_list(self, file_content):
+    def _get_list_of_offers(self, file_content):
         logger.info('[Store:{}] Parsing XML...'.format(self.store.name))
         parser = etree.XMLParser(huge_tree=True)
         logger.info('[Store:{}] Parsing went well :)'.format(self.store.name))
         root = etree.fromstring(str.encode(file_content), parser)
-        return list(self._we_have_to_go_deeper(root, self.depth))
+        offers = list(root.xpath(self.store.data_source.child.offers_xpath))
+        return offers
 
-    def _we_have_to_go_deeper(self, root, depth):
-        for i in range(int(depth)):
-            root = root[0]
-        return root
+    def _node_to_dict(self, node):
+        offer_dict = {}
+        for field in self.store.data_source.child.fields:
+            if not field.xpath:
+                offer_dict[field.name] = None
+                continue
 
-    def _make_dict(self, product, xml_tag_dict=None):
-        """
-        Translate product xml into dictionary used to insert into database
-        :param product: product xml root
-        :param xml_tag_dict: dictionary of xpaths used to translate
-        :return: created dictionary
-        """
+            offer_dict[field.name] = node.xpath(field.xpath)
 
-        xml_tag_dict = xml_tag_dict or self.xml_tag_dict
-
-        product_dict = {}
-        for (dict_key, xpath) in xml_tag_dict.items():
-            (tag, default_0) = xpath
-            regex = re.compile("([^{]*)({.*})?")
-            recurency = regex.search(tag).groups()
-            ntag = recurency[0]
-            elems = product.xpath(ntag, namespaces=self.xmls_namespace)
-            for elem in elems:
-                if recurency[1] is not None:
-                    self._get_dict_from_elem(eval(recurency[1]), dict_key, elem, tag, product_dict)
-                else:
-                    self._get_value_from_elem(dict_key, default_0, elem, ntag, product_dict)
-
-            product_dict.setdefault(dict_key, (str(default_0) if default_0 is not None else None))
-
-            if product_dict[dict_key] is not None and len(product_dict[dict_key]) == 1:
-                product_dict[dict_key] = product_dict[dict_key][0]
-
-        return product_dict
-
-    def _get_dict_from_elem(self, xml_tag_dict, new_tag, elem, tag, product_dict):
-        if elem is not None:
-            if product_dict.get(new_tag) is None:
-                product_dict[new_tag] = []
-
-            product_dict[new_tag].append(self._make_dict(elem, xml_tag_dict))
-
-    def _get_value_from_elem(self, new_tag, default_0, elem, tag, product_dict):
-        if elem is not None:
-            if product_dict.get(new_tag) is None:
-                product_dict[new_tag] = []
-            if isinstance(elem, str):
-                product_dict[new_tag].append(str(elem))
+            if len(offer_dict[field.name]) == 0:
+                offer_dict[field.name] = None
+            elif len(offer_dict[field.name]) == 1:
+                offer_dict[field.name] = self._node_to_string(offer_dict[field.name][0])
             else:
-                product_dict[new_tag].append(str(elem.text if elem.text != "" and elem.text is not None else default_0))
+                offer_dict[field.name] = [self._node_to_string(li) for li in offer_dict[field.name]]
+
+        return offer_dict
+
+    def _node_to_string(self, node):
+        """
+        Converts lxml.etree._ElementUnicodeResult to str,
+        or whole node to str
+        """
+        return str(node) if isinstance(node, str) else etree.tostring(node, encoding='unicode')

@@ -1,5 +1,7 @@
 import textwrap
+from lxml import etree
 
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 
@@ -51,23 +53,29 @@ class DataSourceModel(models.Model):
 
 
 class XmlDataSourceModel(DataSourceModel):
-
-    offers_root_xpath = models.CharField(
+    SINGLE_XML = 1
+    DATA_SOURCE_TYPE_CHOICES = (
+        (SINGLE_XML, _('Single XML')),
+    )
+    type = models.IntegerField(_('Data source type'), choices=DATA_SOURCE_TYPE_CHOICES, default=SINGLE_XML)
+    url = models.URLField(help_text=_('URL address of data source'), default=None, blank=False)
+    offers_xpath = models.CharField(
+        default='',
         max_length=64,
         help_text=_(textwrap.dedent("""
-            XPath to element which children are offers elements.
+            XPath to offer elements.
 
-            For document below, that would be /root
+            For document below, that would be /root/book
             <root>
               <book></book>
               <book></book>
             </root>
 
-            and in that case, that would be /root/offers
+            For document below, that would be /root/offers/offer
             <root>
               <store>
                 <location></location>
-              <store>
+              </store>
               <offers>
                 <offer></offer>
                 <offer></offer>
@@ -76,15 +84,6 @@ class XmlDataSourceModel(DataSourceModel):
             """)
         ).replace('<', '&lt;').replace('>', '&gt;').replace(' ', '&nbsp;').replace('\n', '<br />')
     )
-
-    SINGLE_XML = 1
-
-    DATA_SOURCE_TYPE_CHOICES = (
-        (SINGLE_XML, _('Single XML')),
-    )
-
-    type = models.IntegerField(_('Data source type'), choices=DATA_SOURCE_TYPE_CHOICES, default=SINGLE_XML)
-    url = models.URLField(help_text=_('URL address of data source'), default=None, blank=False)
     custom_class = models.CharField(max_length=32, choices=get_data_source_classes(), default='XmlDataSourceImpl')
 
     @property
@@ -99,14 +98,26 @@ class XmlDataSourceModel(DataSourceModel):
         return '{} - class {}'.format(self.name, self.custom_class)
 
 
+def xpath_validator(value):
+    root = etree.fromstring('<root></root>')
+    try:
+        root.xpath(value)
+    except Exception:
+        raise ValidationError(
+            _("'%(value)s' is not valid xpath"),
+            params={'value': value},
+        )
+
 
 class XmlDataField(models.Model):
-
-    # TODO: make sure, that user cannot create field with name 'data'.
-
     name = models.CharField(max_length=32)
-    xpath = models.CharField(help_text=_('Relative xpath needed to extract value of field'), max_length=256)
-    default_value = models.CharField(max_length=32, default='', blank=True)
+    xpath = models.CharField(
+        default='',
+        blank=True,
+        help_text=_('Relative xpath needed to extract value of field'),
+        max_length=256,
+        validators=[xpath_validator]
+    )
     data_source = models.ForeignKey(XmlDataSourceModel)
 
     def __str__(self):

@@ -9,9 +9,9 @@ class Product(models.Model):
     store = models.ForeignKey('stores.Store')
 
     external_id = models.IntegerField()
-    title = models.CharField(_('Title of Product'), max_length=255)
-    url = models.URLField(max_length=2048)
-    price = models.DecimalField(max_digits=8, decimal_places=2)
+    title = models.CharField(_('Title of Product'), max_length=255, blank=True, default='')
+    url = models.URLField(max_length=2048, blank=True, default='')
+    price = models.DecimalField(max_digits=8, decimal_places=2, blank=True, default=Decimal('0.00'))
 
     data = JSONField(default=dict)
 

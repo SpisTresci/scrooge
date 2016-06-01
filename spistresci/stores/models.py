@@ -76,6 +76,9 @@ class Store(models.Model):
             for product_key in list(product_dict.keys()):  # list is needed because of product_dict.pop
                 if product_key not in field_names:
                     data[product_key] = product_dict.pop(product_key)
+                elif product_dict[product_key] is None:
+                    product_dict.pop(product_key)
+
 
             product = Product.objects.create(store=self, data=data, **product_dict)  # TODO: change to bulk_create?
             logger.info('[Store:{}] New product: {}'.format(self.name, str(product)))

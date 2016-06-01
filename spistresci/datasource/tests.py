@@ -11,7 +11,7 @@ from spistresci.stores.utils.datastoragemanager import DataStorageManager
 class TestXmlDataSource(TestCase):
 
     def setUp(self):
-        data_source = XmlDataSourceModel.objects.create(name='Foo', depth=0, url='http://foo.com/xml')
+        data_source = XmlDataSourceModel.objects.create(name='Foo', offers_xpath='/whatever', url='http://foo.com/xml')
         self.store = Store.objects.create(name='Foo', data_source=data_source)
 
     def test_default_data_source_is_instance_of_XmlDataSource(self):
@@ -65,11 +65,11 @@ class TestUpdateOfXmlDataSource(TestCase):
         self.data_storage_manager = self.patcher1.start()
         self.update_products = self.patcher2.start()
 
-        data_source = XmlDataSourceModel.objects.create(name='Foo', depth=0, url='http://foo.com/xml')
+        data_source = XmlDataSourceModel.objects.create(name='Foo', offers_xpath='/products/product', url='http://foo.com/xml')
         self.store = Store.objects.create(name='Foo', data_source=data_source, last_update_revision=0)
 
-        XmlDataField.objects.create(name='external_id', xpath='./id', default_value='', data_source=data_source)
-        XmlDataField.objects.create(name='title', xpath='./title', default_value='', data_source=data_source)
+        XmlDataField.objects.create(name='external_id', xpath='./id/text()', data_source=data_source)
+        XmlDataField.objects.create(name='title', xpath='./title/text()', data_source=data_source)
 
         self.data_storage_manager.return_value.last_revision_number.return_value = 1
 

@@ -10,7 +10,7 @@ from spistresci.stores.models import Store
 class TestStore(TestCase):
 
     def setUp(self):
-        data_source = XmlDataSourceModel.objects.create(name='Foo', depth=0, url='http://foo.com/xml')
+        data_source = XmlDataSourceModel.objects.create(name='Foo', offers_xpath='/whatever', url='http://foo.com/xml')
         self.store = Store.objects.create(name='Foo', data_source=data_source)
 
     def test_update_products__update_revision_number(self):
