@@ -28,10 +28,20 @@ Name
 XMLDataSource
 -------------
 
+Data Source type
+    XMLDataSource is capable of extracting data not only from single XML file, but also from archives which contains multiple XML files. With *Data Source type* you can specify behaviour for file downloaded from specified *url*.
+
+    Single XML
+        The most basic case, when *Store* expose all products by single XML file as API
+
+Url
+    Address from which data will fetched periodically
+
+
 Offers root xpath
     XPath to element which children are offers elements.
 
-    For document below, that would be ``/root``
+    For document below, that would be ``/root/book``
 
     .. code-block:: html
 
@@ -40,7 +50,7 @@ Offers root xpath
             <book></book>
         </root>
 
-    and in that case, that would be ``/root/offers``
+    and in that case, that would be ``/root/offers/offer``
 
     .. code-block:: html
 
@@ -53,15 +63,6 @@ Offers root xpath
                 <offer></offer>
             </offers>
         </root>
-
-Data Source type
-    XMLDataSource is capable of extracting data not only from single XML file, but also from archives which contains multiple XML files. With *Data Source type* you can specify behaviour for file downloaded from specified *url*.
-
-    Single XML
-        The most basic case, when *Store* expose all products by single XML file as API
-
-Url
-    Address from which data will fetched periodically
 
 Custom Class
     Sometimes data provided by Store do not suit very well to assumptions which need to be made during design of database. For example, we assumed that each product has unique integer *id* in *Store* database, or each product has name no longer than 256 characters. For sure there are Stores, which can have products with even longer names, or Stores which have alphanumeric ids.
@@ -81,20 +82,25 @@ Required XML Data Fields
 
     external_id
         is an *id* of product which *Store* uses in own database to identify specific product (name of product is not the best candidate for being a unique identifier, because there can be multiple products with the same name).
-    name
+    name (default='')
         Because products have to be presented somehow to users, that is why we need something like *name* for each product.
 
-    price
-        Each product should have own price. If some store distributes also some product for free, you can always set default value for price to `0`.
+        If xpath will not be properly resolved, default value will be used.
 
-    url
+    price (default=Decimal('0.00'))
+        Each product should have own price. If xpath will not be properly resolved, default value will be used.
+        
+        If xpath will not be properly resolved, default value will be used.
+
+    url (default='')
         We assume, that each product has own url, where you can find details about it.
-
+        
+        If xpath will not be properly resolved, default value will be used.
 
 Additional XML Data Fields
     .. image:: images/datasource_additional_xmldatafields.png
 
-    The great news is that you can store any data about products in the database! :) The only thing which you have to do to is provide the *name* for the property, information how to extract value of this property from XML document (by *xpath*), and default value for property in case if some products will not have matadata for this specific field.
+    The great news is that you can store any data about offers/products in the database! :) The only thing which you have to do to is provide the *name* for the property and information how to extract value of this property from XML document (by *xpath*)
 
     For example, to store information about *size* of product in your database, just create new field with name *size* (or 'dimensions' if you prefer - name of property do not have to be exactly the same as it is in XML document of specific store). You will be able to fetch all additional data stored in database via API.
 
@@ -153,7 +159,7 @@ Because of the structure of typical XML document like this, part ``/document/pro
 
 To overcome this problem in that case ``/document/products/product`` should be specified as *offers root xpath* for whole XMLDataSource.
 
-Thanks to that, all *XML Data Field*'s xpaths can be simplified and replaced with relative xpaths. In that case that would be: ``./model``, ``./price``.
+Thanks to that, all *XML Data Field*'s xpaths can be simplified and replaced **with relative xpaths**. In that case that would be: ``./model``, ``./price``.
 
 Example of complete configuration
 ---------------------------------
