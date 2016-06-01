@@ -153,13 +153,13 @@ XPath (`XML Path Language`_) is a best way to specify how to exctract data from 
       </products>
     </document>
 
-with xpath ``/document/products/product/model`` you will get ``['Tesla Roadster', 'Tesla Model S', 'Tesla Model X', 'Tesla Model 3']``, and similarly with ``/document/products/product/price`` you will get ``['63400.00', '69300.00', '35000.00']`` (please notice that we got only 3 prices, because 'Tesla Roadster' is not available and document do not describe it's price).
+with xpath ``/document/products/product/model/text()`` you will get ``['Tesla Roadster', 'Tesla Model S', 'Tesla Model X', 'Tesla Model 3']``, and similarly with ``/document/products/product/price/text()`` you will get ``['63400.00', '69300.00', '35000.00']`` (please notice that we got only 3 prices, because 'Tesla Roadster' is not available and document do not describe it's price).
 
 Because of the structure of typical XML document like this, part ``/document/products/product`` may seem to be redundant. Actually, it is very important, because without it alghorithm would not know how to group extracted properties into properties of single offer.
 
 To overcome this problem in that case ``/document/products/product`` should be specified as *offers root xpath* for whole XMLDataSource.
 
-Thanks to that, all *XML Data Field*'s xpaths can be simplified and replaced **with relative xpaths**. In that case that would be: ``./model``, ``./price``.
+Thanks to that, all *XML Data Field*'s xpaths can be simplified and replaced **with relative xpaths**. In that case that would be: ``./model/text()``, ``./price/text()``.
 
 Example of complete configuration
 ---------------------------------
