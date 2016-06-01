@@ -4,6 +4,12 @@ from django.core.urlresolvers import reverse
 from spistresci.products.models import Product
 
 
+def get_url(obj):
+    return '<a href="{url}">{url}</a>'.format(url=obj.url)
+
+get_url.allow_tags = True
+get_url.short_description = 'url'
+
 def get_store(obj):
     return '<a href="{}">{}</a>'.format(
         reverse('admin:stores_store_change', args=(obj.store.id,)),
@@ -19,8 +25,9 @@ class ProductAdmin(admin.ModelAdmin):
 
     list_display = (
         'external_id',
+        'name',
+        get_url,
         'price',
-        'title',
         get_store
     )
 

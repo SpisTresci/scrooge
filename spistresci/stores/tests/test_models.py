@@ -19,7 +19,7 @@ class TestStore(TestCase):
         self.assertEqual(self.store.last_update_revision, 0)
 
     def test_update_products__revision_number_is_not_updated_if_update_aborted(self):
-        products_to_add = [{'external_id': 1, 'title': 'some bar', 'url': 'http://bar.com/1'}]
+        products_to_add = [{'external_id': 1, 'name': 'some bar', 'url': 'http://bar.com/1'}]
 
         self.assertEqual(self.store.last_update_revision, None)
         self.store.update_products(revision_number=0, added=products_to_add)
@@ -33,7 +33,7 @@ class TestStore(TestCase):
     def test_update_products__added(self):
         product_1 = {
             'external_id': 1,
-            'title': 'some bar',
+            'name': 'some bar',
             'url': 'http://bar.com/1'
         }
 
@@ -44,7 +44,7 @@ class TestStore(TestCase):
     def test_update_products__additional_data_stored_in_data_json_field(self):
         core_data_1 = {
             'external_id': 1,
-            'title': 'some bar',
+            'name': 'some bar',
             'url': 'http://bar.com/1',
             'price': '3.14',
         }
@@ -63,9 +63,9 @@ class TestStore(TestCase):
 
     def test_update_products__deletes_products(self):
         products = [
-            {'external_id': 1, 'title': 'some bar 1', 'url': 'http://bar.com/1'},
-            {'external_id': 2, 'title': 'some bar 2', 'url': 'http://bar.com/2'},
-            {'external_id': 3, 'title': 'some bar 3', 'url': 'http://bar.com/3'},
+            {'external_id': 1, 'name': 'some bar 1', 'url': 'http://bar.com/1'},
+            {'external_id': 2, 'name': 'some bar 2', 'url': 'http://bar.com/2'},
+            {'external_id': 3, 'name': 'some bar 3', 'url': 'http://bar.com/3'},
         ]
         Product.objects.bulk_create([Product(store=self.store, **product) for product in products])
 
@@ -75,14 +75,14 @@ class TestStore(TestCase):
 
     def test_update_products__modify_core_fields_of_products(self):
         products = [
-            {'external_id': 1, 'title': 'some bar 1', 'url': 'http://bar.com/1', 'price': '1.99'},
-            {'external_id': 2, 'title': 'some bar 2', 'url': 'http://bar.com/2', 'price': '9.00'},
-            {'external_id': 3, 'title': 'some bar 3', 'url': 'http://bar.com/3', 'price': '5.00'},
-            {'external_id': 4, 'title': 'some bar 4', 'url': 'http://bar.com/4', 'price': '29.99'},
+            {'external_id': 1, 'name': 'some bar 1', 'url': 'http://bar.com/1', 'price': '1.99'},
+            {'external_id': 2, 'name': 'some bar 2', 'url': 'http://bar.com/2', 'price': '9.00'},
+            {'external_id': 3, 'name': 'some bar 3', 'url': 'http://bar.com/3', 'price': '5.00'},
+            {'external_id': 4, 'name': 'some bar 4', 'url': 'http://bar.com/4', 'price': '29.99'},
         ]
         Product.objects.bulk_create([Product(store=self.store, **product) for product in products])
 
-        products[0]['title'] += ' - 2nd edition'
+        products[0]['name'] += ' - 2nd edition'
         products[1]['price'] = '18.00'
         del products[2]['price']  # should reset to default 0
 
@@ -97,11 +97,11 @@ class TestStore(TestCase):
 
     def test_update_products__modify_additional_fields_of_products(self):
         core_data = [
-            {'external_id': 2, 'title': '2', 'url': 'http://bar.com/2', 'price': '9.00'},
-            {'external_id': 1, 'title': '1', 'url': 'http://bar.com/1', 'price': '1.99'},
-            {'external_id': 3, 'title': '3', 'url': 'http://bar.com/3', 'price': '5.00'},
-            {'external_id': 4, 'title': '4', 'url': 'http://bar.com/4', 'price': '29.99'},
-            {'external_id': 5, 'title': '5', 'url': 'http://bar.com/5', 'price': '0.00'},
+            {'external_id': 2, 'name': '2', 'url': 'http://bar.com/2', 'price': '9.00'},
+            {'external_id': 1, 'name': '1', 'url': 'http://bar.com/1', 'price': '1.99'},
+            {'external_id': 3, 'name': '3', 'url': 'http://bar.com/3', 'price': '5.00'},
+            {'external_id': 4, 'name': '4', 'url': 'http://bar.com/4', 'price': '29.99'},
+            {'external_id': 5, 'name': '5', 'url': 'http://bar.com/5', 'price': '0.00'},
         ]
 
         additional_data = [

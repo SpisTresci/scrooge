@@ -69,14 +69,14 @@ class TestUpdateOfXmlDataSource(TestCase):
         self.store = Store.objects.create(name='Foo', data_source=data_source, last_update_revision=0)
 
         XmlDataField.objects.create(name='external_id', xpath='./id/text()', data_source=data_source)
-        XmlDataField.objects.create(name='title', xpath='./title/text()', data_source=data_source)
+        XmlDataField.objects.create(name='name', xpath='./name/text()', data_source=data_source)
 
         self.data_storage_manager.return_value.last_revision_number.return_value = 1
 
         self.rev0 = '''
             <products>
-                <product><id>1</id><title>AAA</title></product>
-                <product><id>2</id><title>BBB</title></product>
+                <product><id>1</id><name>AAA</name></product>
+                <product><id>2</id><name>BBB</name></product>
             </products>
             '''
         self.rev1 = None
@@ -101,10 +101,10 @@ class TestUpdateOfXmlDataSource(TestCase):
     def test_update__products_were_added_to_existing_store(self):
         self.rev1 = '''
             <products>
-                <product><id>1</id><title>AAA</title></product>
-                <product><id>2</id><title>BBB</title></product>
-                <product><id>3</id><title>CCC</title></product>
-                <product><id>4</id><title>DDD</title></product>
+                <product><id>1</id><name>AAA</name></product>
+                <product><id>2</id><name>BBB</name></product>
+                <product><id>3</id><name>CCC</name></product>
+                <product><id>4</id><name>DDD</name></product>
             </products>
             '''
 
@@ -112,8 +112,8 @@ class TestUpdateOfXmlDataSource(TestCase):
 
         expected = {
             'added': [
-                {'external_id': '3', 'title': 'CCC'},
-                {'external_id': '4', 'title': 'DDD'},
+                {'external_id': '3', 'name': 'CCC'},
+                {'external_id': '4', 'name': 'DDD'},
             ],
             'deleted': [],
             'modified': [],
@@ -126,8 +126,8 @@ class TestUpdateOfXmlDataSource(TestCase):
     def test_update__products_were_modified(self):
         self.rev1 = '''
             <products>
-                <product><id>1</id><title>AAA - aaa</title></product>
-                <product><id>2</id><title>BBB - bbb</title></product>
+                <product><id>1</id><name>AAA - aaa</name></product>
+                <product><id>2</id><name>BBB - bbb</name></product>
             </products>
             '''
 
@@ -137,8 +137,8 @@ class TestUpdateOfXmlDataSource(TestCase):
             'added': [],
             'deleted': [],
             'modified': [
-                {'external_id': '1', 'title': 'AAA - aaa'},
-                {'external_id': '2', 'title': 'BBB - bbb'},
+                {'external_id': '1', 'name': 'AAA - aaa'},
+                {'external_id': '2', 'name': 'BBB - bbb'},
             ],
             'revision_number': 1
         }
@@ -154,8 +154,8 @@ class TestUpdateOfXmlDataSource(TestCase):
         expected = {
             'added': [],
             'deleted': [
-                {'external_id': '1', 'title': 'AAA'},
-                {'external_id': '2', 'title': 'BBB'},
+                {'external_id': '1', 'name': 'AAA'},
+                {'external_id': '2', 'name': 'BBB'},
             ],
             'modified': [],
             'revision_number': 1
@@ -167,8 +167,8 @@ class TestUpdateOfXmlDataSource(TestCase):
     def test_update__products_were_added_modified_and_deleted(self):
         self.rev1 = '''
             <products>
-                <product><id>1</id><title>AAA - aaa</title></product>
-                <product><id>3</id><title>CCC</title></product>
+                <product><id>1</id><name>AAA - aaa</name></product>
+                <product><id>3</id><name>CCC</name></product>
             </products>
             '''
 
@@ -176,9 +176,9 @@ class TestUpdateOfXmlDataSource(TestCase):
 
         self.update_products.assert_called_once_with(
             revision_number=1,
-            added=[{'external_id': '3', 'title': 'CCC'}],
-            deleted=[{'external_id': '2', 'title': 'BBB'}],
-            modified=[{'external_id': '1', 'title': 'AAA - aaa'}]
+            added=[{'external_id': '3', 'name': 'CCC'}],
+            deleted=[{'external_id': '2', 'name': 'BBB'}],
+            modified=[{'external_id': '1', 'name': 'AAA - aaa'}]
         )
 
     def test_update__products_were_not_changed(self):
@@ -189,17 +189,17 @@ class TestUpdateOfXmlDataSource(TestCase):
     def test_update__duplicated_products_are_ignored(self):
         self.rev1 = '''
             <products>
-                <product><id>1</id><title>AAA</title></product>
-                <product><id>2</id><title>BBB</title></product>
+                <product><id>1</id><name>AAA</name></product>
+                <product><id>2</id><name>BBB</name></product>
 
-                <product><id>3</id><title>CCC</title></product>
-                <product><id>3</id><title>CCC - 2</title></product>
+                <product><id>3</id><name>CCC</name></product>
+                <product><id>3</id><name>CCC - 2</name></product>
 
-                <product><id>4</id><title>DDD</title></product>
-                <product><id>4</id><title>DDD - 2</title></product>
-                <product><id>4</id><title>DDD - 3</title></product>
+                <product><id>4</id><name>DDD</name></product>
+                <product><id>4</id><name>DDD - 2</name></product>
+                <product><id>4</id><name>DDD - 3</name></product>
 
-                <product><id>5</id><title>EEE</title></product>
+                <product><id>5</id><name>EEE</name></product>
             </products>
             '''
 
@@ -214,9 +214,9 @@ class TestUpdateOfXmlDataSource(TestCase):
 
         expected = {
             'added': [
-                {'external_id': '3', 'title': 'CCC'},
-                {'external_id': '4', 'title': 'DDD'},
-                {'external_id': '5', 'title': 'EEE'},
+                {'external_id': '3', 'name': 'CCC'},
+                {'external_id': '4', 'name': 'DDD'},
+                {'external_id': '5', 'name': 'EEE'},
             ],
             'deleted': [],
             'modified': [],
