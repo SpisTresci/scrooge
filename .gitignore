@@ -74,3 +74,9 @@ tests/.hitch
 
 # Config file for stores module
 stores.yml
+
+# data stored by DataStorageManager
+data/
+
+# build directory of sphinx
+/docs/_build/
