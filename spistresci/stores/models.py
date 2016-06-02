@@ -5,7 +5,6 @@ from django.db import models, transaction
 from django.utils.translation import ugettext_lazy as _
 
 from spistresci.products.models import Product
-from spistresci.datasource.generic import DataSourceImpl
 from spistresci.datasource.models import DataSourceModel
 
 
@@ -17,8 +16,8 @@ class Store(models.Model):
         default=True,
         help_text=_('If checked, Store will be updated according to schedule of defined jobs')
     )
-    name = models.CharField(_('Store name'), max_length=32)
-    url = models.URLField(_('Store url address'))
+    name = models.CharField(max_length=32)
+    url = models.URLField(help_text=_('Url to main site of store'))
     last_update_revision = models.IntegerField(null=True, default=None)
     last_successful_update = models.DateTimeField(_('Time of last successful update'), default=None, null=True)
     last_changing_products_update = models.DateTimeField(

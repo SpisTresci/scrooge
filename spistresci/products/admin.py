@@ -10,6 +10,7 @@ def get_url(obj):
 get_url.allow_tags = True
 get_url.short_description = 'url'
 
+
 def get_store(obj):
     return '<a href="{}">{}</a>'.format(
         reverse('admin:stores_store_change', args=(obj.store.id,)),
