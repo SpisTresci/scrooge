@@ -5,9 +5,25 @@ Configuration
 Adding new Store
 ----------------
 
-Before you will be able to add new store, you have to first configure DataSource which will be responsible for providing information how to get data about latest offers from this store.
+To create new *Store*, you have to have account with admin priviliges. Then, log in to admin pannel (<your website>/admin/) and go to *Stores* section.
 
-Defining new DataSource
+.. image:: images/store_add.png
+
+Enabled
+    If checked, Store will be updated according to schedule of defined jobs
+
+Name
+    Name of store
+
+Url
+    Url to main site of store. This is not an url to XML or API. This should be address to main site of *Store*.
+
+
+DataSource
+    DataSource is responsible for providing information how to import data for specific *Store*. To have a possibility to choose any DataSource from dropdown list, you have to first define new DataSource in Admin Panel, as it is described below. Probably you will have to create seperate DataSource for each Store.
+
+
+Adding new DataSource
 -----------------------
 
 Right now matadata about products/offers can be imported from XML files. However architecture of SpisTresci supports multiple formats of input data. If you need a support for different format of API, please `create an Issue on our github`_. You can also provide a support for new formats on your own by providing custom classes which will be derived from `DataSourceModel`_ and `DataSourceImpl`_ classes.
