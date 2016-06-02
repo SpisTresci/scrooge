@@ -9,6 +9,8 @@ To create new *Store*, you have to have account with admin priviliges. Then, log
 
 .. image:: images/store_add.png
 
+**Properties:**
+
 Enabled
     If checked, Store will be updated according to schedule of defined jobs
 
