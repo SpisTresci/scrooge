@@ -12,6 +12,7 @@ services:
       - postgres_data:/var/lib/postgresql/data
       - postgres_backup:/backups
     env_file: ../.env
+    network_mode: 'bridge'
 
   django:
     build:
@@ -23,6 +24,7 @@ services:
       - redis
     command: /gunicorn.sh
     env_file: ../.env
+    network_mode: 'bridge'
 
   django-chroniker:
     build:
@@ -35,15 +37,19 @@ services:
       - postgres
       - redis
     env_file: ../.env
+    network_mode: 'bridge'
 
   nginx:
     build: ./nginx
+    links:
+      - django
     depends_on:
       - django
-    env_file: ../.env
+    network_mode: 'bridge'
 
   redis:
     image: redis:3.0
+    network_mode: 'bridge'
 
   celeryworker:
     build:
@@ -55,6 +61,7 @@ services:
      - postgres
      - redis
     command: celery -A spistresci.taskapp worker -l INFO
+    network_mode: 'bridge'
 
   celerybeat:
     build:
@@ -66,3 +73,4 @@ services:
       - postgres
       - redis
     command: celery -A spistresci.taskapp beat -l INFO
+    network_mode: 'bridge'

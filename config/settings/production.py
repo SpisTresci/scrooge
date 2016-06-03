@@ -75,7 +75,7 @@ SECURE_SSL_REDIRECT = env.bool("DJANGO_SECURE_SSL_REDIRECT", default=True)
 # ------------------------------------------------------------------------------
 # Hosts/domain names that are valid for this site
 # See https://docs.djangoproject.com/en/1.6/ref/settings/#allowed-hosts
-ALLOWED_HOSTS = env.list('DJANGO_ALLOWED_HOSTS', default=['spistresci.pl'])
+ALLOWED_HOSTS = env.list('DJANGO_ALLOWED_HOSTS', default=[env('HOST_ADDRESS')])
 # END SITE CONFIGURATION
 
 INSTALLED_APPS += ("gunicorn", )
@@ -242,7 +242,7 @@ ADMIN_URL = env('DJANGO_ADMIN_URL')
 # Your production stuff: Below this line define 3rd party library settings
 
 # Django-chroniker
-VIRTUAL_HOST = env('VIRTUAL_HOST').split(',')[0]
-BASE_URL = 'http://{}'.format(VIRTUAL_HOST)
+HOST_ADDRESS = env('HOST_ADDRESS').split(',')[0]
+BASE_URL = 'http://{}'.format(HOST_ADDRESS)
 CHRONIKER_EMAIL_SENDER = 'Chroniker'
-CHRONIKER_EMAIL_HOST_USER = 'chroniker@{}'.format(VIRTUAL_HOST)
+CHRONIKER_EMAIL_HOST_USER = 'chroniker@{}'.format(HOST_ADDRESS)
