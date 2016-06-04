@@ -23,8 +23,8 @@ services:
       - postgres
       - redis
     command: /gunicorn.sh
-    env_file: ../.env
     network_mode: 'bridge'
+    env_file: ../.env
 
   django-chroniker:
     build:
@@ -36,8 +36,8 @@ services:
     links:
       - postgres
       - redis
-    env_file: ../.env
     network_mode: 'bridge'
+    env_file: ../.env
 
   nginx:
     build: ./nginx
@@ -46,6 +46,8 @@ services:
     depends_on:
       - django
     network_mode: 'bridge'
+    environment:
+      - VIRTUAL_HOST=${HOST_ADDRESS}
 
   redis:
     image: redis:3.0
