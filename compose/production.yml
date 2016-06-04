@@ -19,7 +19,7 @@ services:
       context: ..
       dockerfile: compose/django/Dockerfile
     user: django
-    depends_on:
+    links:
       - postgres
       - redis
     command: /gunicorn.sh
@@ -43,8 +43,6 @@ services:
     build: ./nginx
     links:
       - django
-    depends_on:
-      - django
     network_mode: 'bridge'
     environment:
       - VIRTUAL_HOST=${HOST_ADDRESS}
@@ -59,7 +57,7 @@ services:
       dockerfile: compose/django/Dockerfile
     user: django
     env_file: ../.env
-    depends_on:
+    links:
      - postgres
      - redis
     command: celery -A spistresci.taskapp worker -l INFO
@@ -71,7 +69,7 @@ services:
       dockerfile: compose/django/Dockerfile
     user: django
     env_file: ../.env
-    depends_on:
+    links:
       - postgres
       - redis
     command: celery -A spistresci.taskapp beat -l INFO
