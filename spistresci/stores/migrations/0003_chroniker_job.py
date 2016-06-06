@@ -8,7 +8,7 @@ def add_job(apps, schema_editor):
 
     Job.objects.create(**{
         "name": "Update Store Products",
-        "command": "update_store_products",
+        "command": "update_store_offers",
         "args": "--all",
         "frequency": "HOURLY",
     })

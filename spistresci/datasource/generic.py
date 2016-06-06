@@ -39,20 +39,20 @@ class DataSourceImpl:
     def _extract(self, revision):
         pass
 
-    def _filter(self, products, prev_rev_number):
+    def _filter(self, offers, prev_rev_number):
         pass
 
     def update(self):
-        logger.info('[Store:{}] Updating products...'.format(self.store.name))
+        logger.info('[Store:{}] Updating offers...'.format(self.store.name))
         available_revision = self.ds_manager.last_revision_number()
 
         if self.store.last_update_revision is None:
-            products = self._extract(available_revision)
-            self.store.update_products(revision_number=available_revision, added=products)
+            offers = self._extract(available_revision)
+            self.store.update_offers(revision_number=available_revision, added=offers)
         elif self.store.last_update_revision < available_revision:
-            products = self._extract(available_revision)
-            filtered = self._filter(products, self.store.last_update_revision)
-            self.store.update_products(
+            offers = self._extract(available_revision)
+            filtered = self._filter(offers, self.store.last_update_revision)
+            self.store.update_offers(
                 revision_number=available_revision,
                 added=filtered['added'],
                 deleted=filtered['deleted'],
@@ -110,36 +110,36 @@ class XmlDataSourceImpl(DataSourceImpl):
 
         return list(unique_offers.values())
 
-    def _filter(self, products, prev_rev_number):
+    def _filter(self, offers, prev_rev_number):
         logger.info(
             '[Store:{}] Filtering by data from previous version of XML (revision:{})...'.format(
                 self.store.name, prev_rev_number
             )
         )
-        old_products = self._extract(prev_rev_number)
+        old_offers = self._extract(prev_rev_number)
 
-        old_product_dicts = {product['external_id']: product for product in old_products}
-        new_product_dicts = {product['external_id']: product for product in products}
+        old_offer_dicts = {offer['external_id']: offer for offer in old_offers}
+        new_offer_dicts = {offer['external_id']: offer for offer in offers}
 
-        products_added = [
-            new_product_dicts[key]
-            for key in list(set(new_product_dicts.keys()) - set(old_product_dicts.keys()))
+        offers_added = [
+            new_offer_dicts[key]
+            for key in list(set(new_offer_dicts.keys()) - set(old_offer_dicts.keys()))
         ]
-        products_deleted = [
-            old_product_dicts[key]
-            for key in list(set(old_product_dicts.keys()) - set(new_product_dicts.keys()))
+        offers_deleted = [
+            old_offer_dicts[key]
+            for key in list(set(old_offer_dicts.keys()) - set(new_offer_dicts.keys()))
         ]
 
-        products_modified = [
-            new_product_dicts[key]
-            for key in set(old_product_dicts.keys()).intersection(set(new_product_dicts.keys()))
-            if old_product_dicts[key] != new_product_dicts[key]
+        offers_modified = [
+            new_offer_dicts[key]
+            for key in set(old_offer_dicts.keys()).intersection(set(new_offer_dicts.keys()))
+            if old_offer_dicts[key] != new_offer_dicts[key]
         ]
 
         return {
-            'added': products_added,
-            'deleted': products_deleted,
-            'modified': products_modified,
+            'added': offers_added,
+            'deleted': offers_deleted,
+            'modified': offers_modified,
         }
 
     def _get_list_of_offers(self, file_content):
