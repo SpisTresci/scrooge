@@ -45,6 +45,7 @@ THIRD_PARTY_APPS = (
 # Apps specific for this project go here.
 LOCAL_APPS = (
     'spistresci.users',  # custom users app
+    'spistresci.offers',
     'spistresci.products',
     'spistresci.stores',
     'spistresci.datasource',

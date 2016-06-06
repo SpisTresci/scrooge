@@ -4,7 +4,7 @@ from datetime import datetime
 from django.db import models, transaction
 from django.utils.translation import ugettext_lazy as _
 
-from spistresci.products.models import Product
+from spistresci.offers.models import Offer
 from spistresci.datasource.models import DataSourceModel
 
 
@@ -68,7 +68,7 @@ class Store(models.Model):
         if not products:
             return
 
-        field_names = Product._meta.get_all_field_names()
+        field_names = Offer._meta.get_all_field_names()
         for product_dict in products:
             data = {}
 
@@ -79,7 +79,7 @@ class Store(models.Model):
                     product_dict.pop(product_key)
 
 
-            product = Product.objects.create(store=self, data=data, **product_dict)  # TODO: change to bulk_create?
+            product = Offer.objects.create(store=self, data=data, **product_dict)  # TODO: change to bulk_create?
             logger.info('[Store:{}] New product: {}'.format(self.name, str(product)))
 
     def __delete_products(self, products):
@@ -88,7 +88,7 @@ class Store(models.Model):
 
         # TODO: "deactivate" product instead deleting it
         id_of_products_to_delete = [product_dict['external_id'] for product_dict in products]
-        Product.objects.filter(external_id__in=id_of_products_to_delete).delete()
+        Offer.objects.filter(external_id__in=id_of_products_to_delete).delete()
 
     def __modify_products(self, products):
         # TODO: change to buld_update? - https://github.com/aykut/django-bulk-update
@@ -115,24 +115,24 @@ class Store(models.Model):
 
                 if not self.changes:
                     logger.warning(
-                        '[Store:{}][Product:{}]\n\t'
+                        '[Store:{}][Offer:{}]\n\t'
                         'No changes, but product was on "modified" list'.format(self.store_name, self.product_id)
                     )
                 else:
                     logger.info(
-                        '[Store:{}][Product:{}]\n\t'
+                        '[Store:{}][Offer:{}]\n\t'
                         '{}'.format(self.store_name, self.product_id, '\n\t'.join(self.changes))
                     )
 
         core_fields = []
 
-        for field in Product._meta.fields:
+        for field in Offer._meta.fields:
             if field.get_internal_type() != 'ForeignKey' and field.name not in ['data', 'id']:
                 core_fields.append(field.name)
 
         sorted_modified = sorted(products, key=lambda d: int(d['external_id']))
 
-        sorted_products_queryset = Product.objects.filter(
+        sorted_products_queryset = Offer.objects.filter(
             external_id__in=[product_dict['external_id'] for product_dict in products]
         ).order_by('external_id')
 
@@ -142,7 +142,7 @@ class Store(models.Model):
 
                 if key in core_fields:
                     if key not in product_dict:
-                        new_val = Product._meta.get_field_by_name(key)[0].default
+                        new_val = Offer._meta.get_field_by_name(key)[0].default
                         changes.add(key, '<no_value>', new_val, db_value_type='<no_type>')
                         setattr(product_db, key, new_val)
                     elif getattr(product_db, key) != type(getattr(product_db, key))(product_dict[key]):

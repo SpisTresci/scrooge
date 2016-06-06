@@ -4,13 +4,13 @@ from django.forms import ValidationError
 from django.forms.models import BaseInlineFormSet
 
 from spistresci.datasource.models import XmlDataSourceModel, XmlDataField
-from spistresci.products.models import Product
+from spistresci.offers.models import Offer
 
 
 def dict_of_required_fields():
     return [
         {'name': field.name}
-        for field in Product._meta.fields
+        for field in Offer._meta.fields
         if field.name not in ['id', 'store', 'data']
     ]
 
@@ -32,7 +32,6 @@ class RequiredInlineFormSet(BaseInlineFormSet):
 
         self.can_delete = False
         return form
-
 
     def __init__(self, *args, **kwargs):
         super(RequiredInlineFormSet, self).__init__(*args, **kwargs)

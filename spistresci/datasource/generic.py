@@ -105,7 +105,7 @@ class XmlDataSourceImpl(DataSourceImpl):
                 unique_offers[external_id] = offer
             else:
                 logger.warning(
-                    '[Store:{}] Product with external_id "{}" is not unique!'.format(self.store.name, external_id)
+                    '[Store:{}] Offer with external_id "{}" is not unique!'.format(self.store.name, external_id)
                 )
 
         return list(unique_offers.values())

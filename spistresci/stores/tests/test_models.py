@@ -3,7 +3,7 @@ from django.db.utils import IntegrityError
 from test_plus.test import TestCase
 
 from spistresci.datasource.models import XmlDataSourceModel
-from spistresci.products.models import Product
+from spistresci.offers.models import Offer
 from spistresci.stores.models import Store
 
 
@@ -38,8 +38,8 @@ class TestStore(TestCase):
         }
 
         self.store.update_products(revision_number=0, added=[product_1])
-        self.assertEqual(Product.objects.count(), 1)
-        self.assertTrue(Product.objects.filter(store=self.store, price=Decimal(0), **product_1).exists())
+        self.assertEqual(Offer.objects.count(), 1)
+        self.assertTrue(Offer.objects.filter(store=self.store, price=Decimal(0), **product_1).exists())
 
     def test_update_products__additional_data_stored_in_data_json_field(self):
         core_data_1 = {
@@ -58,8 +58,8 @@ class TestStore(TestCase):
         product_1.update(core_data_1)
         product_1.update(additional_data_1)
         self.store.update_products(revision_number=0, added=[product_1])
-        self.assertEqual(Product.objects.count(), 1)
-        self.assertTrue(Product.objects.filter(store=self.store, data=additional_data_1, **core_data_1).exists())
+        self.assertEqual(Offer.objects.count(), 1)
+        self.assertTrue(Offer.objects.filter(store=self.store, data=additional_data_1, **core_data_1).exists())
 
     def test_update_products__deletes_products(self):
         products = [
@@ -67,11 +67,11 @@ class TestStore(TestCase):
             {'external_id': 2, 'name': 'some bar 2', 'url': 'http://bar.com/2'},
             {'external_id': 3, 'name': 'some bar 3', 'url': 'http://bar.com/3'},
         ]
-        Product.objects.bulk_create([Product(store=self.store, **product) for product in products])
+        Offer.objects.bulk_create([Offer(store=self.store, **product) for product in products])
 
         self.store.update_products(revision_number=0, deleted=products[0:2])
-        self.assertEqual(Product.objects.count(), 1)
-        self.assertTrue(Product.objects.filter(store=self.store, **products[2]).exists())
+        self.assertEqual(Offer.objects.count(), 1)
+        self.assertTrue(Offer.objects.filter(store=self.store, **products[2]).exists())
 
     def test_update_products__modify_core_fields_of_products(self):
         products = [
@@ -80,19 +80,19 @@ class TestStore(TestCase):
             {'external_id': 3, 'name': 'some bar 3', 'url': 'http://bar.com/3', 'price': '5.00'},
             {'external_id': 4, 'name': 'some bar 4', 'url': 'http://bar.com/4', 'price': '29.99'},
         ]
-        Product.objects.bulk_create([Product(store=self.store, **product) for product in products])
+        Offer.objects.bulk_create([Offer(store=self.store, **product) for product in products])
 
         products[0]['name'] += ' - 2nd edition'
         products[1]['price'] = '18.00'
         del products[2]['price']  # should reset to default 0
 
         self.store.update_products(revision_number=0, modified=products[0:3])
-        self.assertEqual(Product.objects.count(), 4)
+        self.assertEqual(Offer.objects.count(), 4)
 
         products[2]['price'] = '0.00'
         self.assertListEqual(
             [True]*4,
-            [Product.objects.filter(store=self.store, **product).exists() for product in products]
+            [Offer.objects.filter(store=self.store, **product).exists() for product in products]
         )
 
     def test_update_products__modify_additional_fields_of_products(self):
@@ -112,8 +112,8 @@ class TestStore(TestCase):
             {'field': 'data'},
 
         ]
-        Product.objects.bulk_create([
-            Product(store=self.store, data=data, **core)
+        Offer.objects.bulk_create([
+            Offer(store=self.store, data=data, **core)
             for core, data in zip(core_data, additional_data)
         ])
 
@@ -128,13 +128,12 @@ class TestStore(TestCase):
             product.update(data)
 
         self.store.update_products(revision_number=0, modified=products[0:4])
-        self.assertEqual(Product.objects.count(), 5)
+        self.assertEqual(Offer.objects.count(), 5)
 
         self.assertListEqual(
             [True]*5,
             [
-                Product.objects.filter(store=self.store, data=data, **core).exists()
+                Offer.objects.filter(store=self.store, data=data, **core).exists()
                 for core, data in zip(core_data, additional_data)
             ]
         )
-
