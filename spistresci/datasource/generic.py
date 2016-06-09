@@ -133,7 +133,7 @@ class XmlDataSourceImpl(DataSourceImpl):
         offers_modified = [
             new_offer_dicts[key]
             for key in set(old_offer_dicts.keys()).intersection(set(new_offer_dicts.keys()))
-            if old_offer_dicts[key] != new_offer_dicts[key]
+            if old_offer_dicts[key] != new_offer_dicts[key] # TODO: FIXME! or self.store.data_source.version_hash != self.store.last_update_data_source_version_hash
         ]
 
         return {

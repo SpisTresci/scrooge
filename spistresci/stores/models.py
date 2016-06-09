@@ -19,6 +19,7 @@ class Store(models.Model):
     name = models.CharField(max_length=32)
     url = models.URLField(help_text=_('Url to main site of store'))
     last_update_revision = models.IntegerField(null=True, default=None)
+    last_update_data_source_version_hash = models.CharField(max_length=32, editable=False, default='')
     last_successful_update = models.DateTimeField(_('Time of last successful update'), default=None, null=True)
     last_changing_offers_update = models.DateTimeField(
         _('Time of last successful update which changed any offer'),
@@ -54,6 +55,7 @@ class Store(models.Model):
 
             self.last_update_revision = revision_number
             self.last_successful_update = datetime.now()
+            self.last_update_data_source_version_hash = self.data_source.version_hash
 
             if added or deleted or modified:
                 self.last_changing_offers_update = datetime.now()

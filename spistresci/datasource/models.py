@@ -1,5 +1,6 @@
 import textwrap
 from lxml import etree
+from hashlib import md5
 
 from django.core.exceptions import ValidationError
 from django.db import models
@@ -16,6 +17,14 @@ from spistresci.datasource.specific import *
 
 class DataSourceModel(models.Model):
     name = models.CharField(_('Name'), max_length=32, unique=True)
+    version_hash = models.CharField(max_length=32, editable=False)
+
+    def save(self, *args, **kwargs):
+        self.recalculate_version_hash()
+        super(DataSourceModel, self).save(*args, **kwargs)
+
+    def recalculate_version_hash(self):
+        return NotImplemented
 
     @staticmethod
     def get_all_subclasses():
@@ -86,6 +95,15 @@ class XmlDataSourceModel(DataSourceModel):
     )
     custom_class = models.CharField(max_length=32, choices=get_data_source_classes(), default='XmlDataSourceImpl')
 
+    def __init__(self, *args, **kwargs):
+        super(XmlDataSourceModel, self).__init__(*args, **kwargs)
+        self._old_offers_xpath = self.offers_xpath
+
+    def recalculate_version_hash(self):
+        content = self.offers_xpath.encode('utf-8')
+        content += ''.join(['{}{}'.format(field.name, field.xpath) for field in self.fields]).encode('utf-8')
+        self.version_hash = md5(content).hexdigest()
+
     @property
     def impl_class(self):
         return XmlDataSourceImpl
@@ -119,6 +137,13 @@ class XmlDataField(models.Model):
         validators=[xpath_validator]
     )
     data_source = models.ForeignKey(XmlDataSourceModel)
+
+    class Meta:
+        unique_together = (("name", "xpath"),)
+
+    def save(self, *args, **kwargs):
+        self.data_source.recalculate_version_hash()
+        super(XmlDataField, self).save(*args, **kwargs)
 
     def __str__(self):
         return '{} - {}'.format(self.name, self.xpath)
