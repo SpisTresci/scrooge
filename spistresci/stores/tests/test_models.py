@@ -95,6 +95,29 @@ class TestStore(TestCase):
             [Offer.objects.filter(store=self.store, **offer).exists() for offer in offers]
         )
 
+    def test_update_offers__modify_core_field_of_offers_with_None(self):
+        offers = [
+            {'external_id': 1, 'name': 'some bar 1', 'url': 'http://bar.com/1', 'price': '1.99'},
+        ]
+        Offer.objects.bulk_create([Offer(store=self.store, **offer) for offer in offers])
+
+        offers[0]['price'] = None
+
+        with self.assertLogs(level='WARNING') as logger_cm:
+            self.store.update_offers(revision_number=0, modified=offers)
+
+        self.assertEqual(logger_cm.output, [
+            "WARNING:spistresci.stores.models:[Store:Foo][Offer:1]\n"
+            "\t[price] 1.99 (<class 'decimal.Decimal'>) => 0.00 (<class 'decimal.Decimal'>)"
+        ])
+
+        self.assertEqual(Offer.objects.count(), 1)
+        offers[0]['price'] = '0.00'
+        self.assertEqual(
+            True,
+            Offer.objects.filter(store=self.store, **offers[0]).exists()
+        )
+
     def test_update_offers__modify_additional_fields_of_offers(self):
         core_data = [
             {'external_id': 2, 'name': '2', 'url': 'http://bar.com/2', 'price': '9.00'},
