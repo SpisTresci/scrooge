@@ -66,10 +66,14 @@ class TestUpdateOfXmlDataSourceImpl(TestCase):
         self.update_offers = self.patcher2.start()
 
         self.data_source = XmlDataSourceModel.objects.create(name='Foo', offers_xpath='/offers/offer', url='http://foo.com/xml')
-        self.store = Store.objects.create(name='Foo', data_source=self.data_source, last_update_revision=0)
-
         XmlDataField.objects.create(name='external_id', xpath='./id/text()', data_source=self.data_source)
         XmlDataField.objects.create(name='name', xpath='./name/text()', data_source=self.data_source)
+        self.store = Store.objects.create(
+            name='Foo',
+            data_source=self.data_source,
+            last_update_revision=0,
+            last_update_data_source_version_hash=self.data_source.version_hash
+        )
 
         self.data_storage_manager.return_value.last_revision_number.return_value = 1
 
@@ -226,7 +230,7 @@ class TestUpdateOfXmlDataSourceImpl(TestCase):
         self.assert_helper(self.update_offers.call_args, expected)
 
     def test_update__redefinition_of_datasource_should_cause_update_of_all_offers(self):
-        XmlDataField.objects.create(name='name', xpath='./price/text()', data_source=self.data_source)
+        XmlDataField.objects.create(name='price', xpath='./price/text()', data_source=self.data_source)
         self.rev1 = self.rev0
 
         self.store.update()

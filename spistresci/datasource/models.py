@@ -110,7 +110,7 @@ class XmlDataSourceModel(DataSourceModel):
 
     @property
     def fields(self):
-        return XmlDataField.objects.filter(data_source=self)
+        return XmlDataField.objects.filter(data_source=self).order_by('id')
 
     def __str__(self):
         return '{} - class {}'.format(self.name, self.custom_class)
@@ -139,11 +139,11 @@ class XmlDataField(models.Model):
     data_source = models.ForeignKey(XmlDataSourceModel)
 
     class Meta:
-        unique_together = (("name", "xpath"),)
+        unique_together = (("name", "data_source"),)
 
     def save(self, *args, **kwargs):
-        self.data_source.recalculate_version_hash()
         super(XmlDataField, self).save(*args, **kwargs)
+        self.data_source.recalculate_version_hash()
 
     def __str__(self):
         return '{} - {}'.format(self.name, self.xpath)

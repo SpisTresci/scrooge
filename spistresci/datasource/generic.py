@@ -1,5 +1,4 @@
 import logging
-import re
 from lxml import etree
 from urllib.request import urlopen, Request
 
@@ -130,11 +129,14 @@ class XmlDataSourceImpl(DataSourceImpl):
             for key in list(set(old_offer_dicts.keys()) - set(new_offer_dicts.keys()))
         ]
 
-        offers_modified = [
-            new_offer_dicts[key]
-            for key in set(old_offer_dicts.keys()).intersection(set(new_offer_dicts.keys()))
-            if old_offer_dicts[key] != new_offer_dicts[key] # TODO: FIXME! or self.store.data_source.version_hash != self.store.last_update_data_source_version_hash
-        ]
+        datasource_changed = self.store.data_source.version_hash != self.store.last_update_data_source_version_hash
+        offers_in_db_and_xml = set(old_offer_dicts.keys()).intersection(set(new_offer_dicts.keys()))
+
+        offers_modified = (
+            [new_offer_dicts[key] for key in offers_in_db_and_xml]
+            if datasource_changed else
+            [new_offer_dicts[key] for key in offers_in_db_and_xml if old_offer_dicts[key] != new_offer_dicts[key]]
+        )
 
         return {
             'added': offers_added,
