@@ -8,6 +8,7 @@ Local settings
 - Add django-extensions as app
 '''
 
+import sys
 from .common import *  # noqa
 
 # DEBUG
@@ -66,7 +67,14 @@ LOGGING = {
         'console': {
             'level': 'DEBUG',
             'class': 'logging.StreamHandler',
-            'formatter': 'simple'
+            'formatter': 'simple',
+            'stream': sys.stdout
+        },
+        'console_stderr': {
+            'level': 'ERROR',
+            'class': 'logging.StreamHandler',
+            'formatter': 'simple',
+            'stream': sys.stderr
         },
         'st_logfile': {
             'level': 'INFO',
@@ -81,11 +89,41 @@ LOGGING = {
     'loggers': {
         'spistresci': {
             'level': 'DEBUG',
-            'handlers': ['console', 'st_logfile'],
+            'handlers': ['console', 'console_stderr', 'st_logfile'],
             'propagate': False,
         }
     },
 }
+
+if len(sys.argv) > 1 and sys.argv[1] == 'test':
+    # during tests don't log on console or to file
+    del LOGGING['loggers']['spistresci']
+
+    LOGGING['formatters']['info_about_assert_logs'] = {
+        '()': 'colorlog.ColoredFormatter',
+        'format': '\n%(red)sEvery log on WARNING level or above should be catched with assertLogs in tests!%(reset)s'
+                  '\n\n%(bold_white)s[%(asctime)s]%(log_color)s %(levelname)-8s%(reset)s %(message)s',
+        'log_colors': {
+          'DEBUG': 'cyan',
+          'INFO': 'green',
+          'WARNING': 'yellow',
+          'ERROR': 'red',
+          'CRITICAL': 'red,bg_white',
+        },
+        'datefmt': '%H:%M:%S'
+    }
+
+    LOGGING['handlers']['test_console'] = {
+        'level': 'WARNING',
+        'class': 'logging.StreamHandler',
+        'formatter': 'info_about_assert_logs'
+    }
+
+    LOGGING['root'] = {
+        'level': 'DEBUG',
+        'handlers': ['test_console'],
+    }
+
 
 # django-debug-toolbar
 # ------------------------------------------------------------------------------
@@ -105,26 +143,12 @@ DEBUG_TOOLBAR_CONFIG = {
 # ------------------------------------------------------------------------------
 INSTALLED_APPS += ('django_extensions', )
 
-# TESTING
-# ------------------------------------------------------------------------------
-import logging
-from django.test.runner import DiscoverRunner
-
-
-class NoLoggingTestRunner(DiscoverRunner):
-    def run_tests(self, test_labels, extra_tests=None, **kwargs):
-        logging.disable(logging.CRITICAL)  # disable logging below CRITICAL while testing
-        return super(NoLoggingTestRunner, self).run_tests(test_labels, extra_tests, **kwargs)
-
-TEST_RUNNER = 'config.settings.local.NoLoggingTestRunner'
-
 ########## CELERY
 # In development, all tasks will be executed locally by blocking until the task returns
 CELERY_ALWAYS_EAGER = True
 ########## END CELERY
 
 # Your local stuff: Below this line define 3rd party library settings
-ST_STORES_CONFIG = env("ST_STORES_CONFIG", default=ROOT_DIR('stores.example.yml'))
 
 # Django-chroniker
 BASE_URL='http://localhost:8000'
