@@ -1,0 +1,76 @@
+version: '2'
+
+volumes:
+  postgres_data: {}
+  postgres_backup: {}
+  app_data: {}
+
+services:
+  postgres:
+    build: ./postgres
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - postgres_backup:/backups
+    env_file: ../.env
+    network_mode: 'bridge'
+
+  django:
+    build:
+      context: ..
+      dockerfile: compose/django/Dockerfile
+    user: django
+    links:
+      - postgres
+      - redis
+    command: /gunicorn.sh
+    network_mode: 'bridge'
+    env_file: ../.env
+
+  django-chroniker:
+    build:
+      context: ..
+      dockerfile: compose/django/Dockerfile
+    volumes:
+      - app_data:/app/data/
+    command: /cron.sh
+    links:
+      - postgres
+      - redis
+    network_mode: 'bridge'
+    env_file: ../.env
+
+  nginx:
+    build: ./nginx
+    links:
+      - django
+    network_mode: 'bridge'
+    environment:
+      - VIRTUAL_HOST=${HOST_ADDRESS}
+
+  redis:
+    image: redis:3.0
+    network_mode: 'bridge'
+
+  celeryworker:
+    build:
+      context: ..
+      dockerfile: compose/django/Dockerfile
+    user: django
+    env_file: ../.env
+    links:
+     - postgres
+     - redis
+    command: celery -A spistresci.taskapp worker -l INFO
+    network_mode: 'bridge'
+
+  celerybeat:
+    build:
+      context: ..
+      dockerfile: compose/django/Dockerfile
+    user: django
+    env_file: ../.env
+    links:
+      - postgres
+      - redis
+    command: celery -A spistresci.taskapp beat -l INFO
+    network_mode: 'bridge'
