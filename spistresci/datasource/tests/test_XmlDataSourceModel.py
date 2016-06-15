@@ -15,8 +15,6 @@ class TestXmlDataSourceModel(TestCase):
             offers_xpath='/offers/offer',
             url='http://foo.com/xml'
         )
-        # f1 = XmlDataField.objects.create(name='external_id', xpath='./id/text()', data_source=self.data_source)
-        # f2 = XmlDataField.objects.create(name='name', xpath='./name/text()', data_source=self.data_source)
 
         version_hash = data_source.version_hash
 
