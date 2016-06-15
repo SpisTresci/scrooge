@@ -3,7 +3,7 @@ from django.db.utils import IntegrityError
 from test_plus.test import TestCase
 
 from spistresci.datasource.models import XmlDataSourceModel
-from spistresci.products.models import Product
+from spistresci.offers.models import Offer
 from spistresci.stores.models import Store
 
 
@@ -13,35 +13,35 @@ class TestStore(TestCase):
         data_source = XmlDataSourceModel.objects.create(name='Foo', offers_xpath='/whatever', url='http://foo.com/xml')
         self.store = Store.objects.create(name='Foo', data_source=data_source)
 
-    def test_update_products__update_revision_number(self):
+    def test_update_offers__update_revision_number(self):
         self.assertEqual(self.store.last_update_revision, None)
-        self.store.update_products(revision_number=0)
+        self.store.update_offers(revision_number=0)
         self.assertEqual(self.store.last_update_revision, 0)
 
-    def test_update_products__revision_number_is_not_updated_if_update_aborted(self):
-        products_to_add = [{'external_id': 1, 'name': 'some bar', 'url': 'http://bar.com/1'}]
+    def test_update_offers__revision_number_is_not_updated_if_update_aborted(self):
+        offers_to_add = [{'external_id': 1, 'name': 'some bar', 'url': 'http://bar.com/1'}]
 
         self.assertEqual(self.store.last_update_revision, None)
-        self.store.update_products(revision_number=0, added=products_to_add)
+        self.store.update_offers(revision_number=0, added=offers_to_add)
         self.assertEqual(self.store.last_update_revision, 0)
 
-        with self.assertRaises(IntegrityError):  # product with the same external_id cannot be added twice
-            self.store.update_products(revision_number=1, added=products_to_add)
+        with self.assertRaises(IntegrityError):  # offer with the same external_id cannot be added twice
+            self.store.update_offers(revision_number=1, added=offers_to_add)
 
         self.assertEqual(self.store.last_update_revision, 0)
 
-    def test_update_products__added(self):
-        product_1 = {
+    def test_update_offers__added(self):
+        offer_1 = {
             'external_id': 1,
             'name': 'some bar',
             'url': 'http://bar.com/1'
         }
 
-        self.store.update_products(revision_number=0, added=[product_1])
-        self.assertEqual(Product.objects.count(), 1)
-        self.assertTrue(Product.objects.filter(store=self.store, price=Decimal(0), **product_1).exists())
+        self.store.update_offers(revision_number=0, added=[offer_1])
+        self.assertEqual(Offer.objects.count(), 1)
+        self.assertTrue(Offer.objects.filter(store=self.store, price=Decimal(0), **offer_1).exists())
 
-    def test_update_products__additional_data_stored_in_data_json_field(self):
+    def test_update_offers__additional_data_stored_in_data_json_field(self):
         core_data_1 = {
             'external_id': 1,
             'name': 'some bar',
@@ -54,48 +54,48 @@ class TestStore(TestCase):
             'midichlorians': 27700
         }
 
-        product_1 = {}
-        product_1.update(core_data_1)
-        product_1.update(additional_data_1)
-        self.store.update_products(revision_number=0, added=[product_1])
-        self.assertEqual(Product.objects.count(), 1)
-        self.assertTrue(Product.objects.filter(store=self.store, data=additional_data_1, **core_data_1).exists())
+        offer_1 = {}
+        offer_1.update(core_data_1)
+        offer_1.update(additional_data_1)
+        self.store.update_offers(revision_number=0, added=[offer_1])
+        self.assertEqual(Offer.objects.count(), 1)
+        self.assertTrue(Offer.objects.filter(store=self.store, data=additional_data_1, **core_data_1).exists())
 
-    def test_update_products__deletes_products(self):
-        products = [
+    def test_update_offers__deletes_offers(self):
+        offers = [
             {'external_id': 1, 'name': 'some bar 1', 'url': 'http://bar.com/1'},
             {'external_id': 2, 'name': 'some bar 2', 'url': 'http://bar.com/2'},
             {'external_id': 3, 'name': 'some bar 3', 'url': 'http://bar.com/3'},
         ]
-        Product.objects.bulk_create([Product(store=self.store, **product) for product in products])
+        Offer.objects.bulk_create([Offer(store=self.store, **offer) for offer in offers])
 
-        self.store.update_products(revision_number=0, deleted=products[0:2])
-        self.assertEqual(Product.objects.count(), 1)
-        self.assertTrue(Product.objects.filter(store=self.store, **products[2]).exists())
+        self.store.update_offers(revision_number=0, deleted=offers[0:2])
+        self.assertEqual(Offer.objects.count(), 1)
+        self.assertTrue(Offer.objects.filter(store=self.store, **offers[2]).exists())
 
-    def test_update_products__modify_core_fields_of_products(self):
-        products = [
+    def test_update_offers__modify_core_fields_of_offers(self):
+        offers = [
             {'external_id': 1, 'name': 'some bar 1', 'url': 'http://bar.com/1', 'price': '1.99'},
             {'external_id': 2, 'name': 'some bar 2', 'url': 'http://bar.com/2', 'price': '9.00'},
             {'external_id': 3, 'name': 'some bar 3', 'url': 'http://bar.com/3', 'price': '5.00'},
             {'external_id': 4, 'name': 'some bar 4', 'url': 'http://bar.com/4', 'price': '29.99'},
         ]
-        Product.objects.bulk_create([Product(store=self.store, **product) for product in products])
+        Offer.objects.bulk_create([Offer(store=self.store, **offer) for offer in offers])
 
-        products[0]['name'] += ' - 2nd edition'
-        products[1]['price'] = '18.00'
-        del products[2]['price']  # should reset to default 0
+        offers[0]['name'] += ' - 2nd edition'
+        offers[1]['price'] = '18.00'
+        del offers[2]['price']  # should reset to default 0
 
-        self.store.update_products(revision_number=0, modified=products[0:3])
-        self.assertEqual(Product.objects.count(), 4)
+        self.store.update_offers(revision_number=0, modified=offers[0:3])
+        self.assertEqual(Offer.objects.count(), 4)
 
-        products[2]['price'] = '0.00'
+        offers[2]['price'] = '0.00'
         self.assertListEqual(
             [True]*4,
-            [Product.objects.filter(store=self.store, **product).exists() for product in products]
+            [Offer.objects.filter(store=self.store, **offer).exists() for offer in offers]
         )
 
-    def test_update_products__modify_additional_fields_of_products(self):
+    def test_update_offers__modify_additional_fields_of_offers(self):
         core_data = [
             {'external_id': 2, 'name': '2', 'url': 'http://bar.com/2', 'price': '9.00'},
             {'external_id': 1, 'name': '1', 'url': 'http://bar.com/1', 'price': '1.99'},
@@ -112,8 +112,8 @@ class TestStore(TestCase):
             {'field': 'data'},
 
         ]
-        Product.objects.bulk_create([
-            Product(store=self.store, data=data, **core)
+        Offer.objects.bulk_create([
+            Offer(store=self.store, data=data, **core)
             for core, data in zip(core_data, additional_data)
         ])
 
@@ -122,19 +122,18 @@ class TestStore(TestCase):
         del additional_data[2]['promo_price']
         additional_data[3]['c'] = 2
 
-        products = [{}, {}, {}, {}, {}]
-        for product, core, data in zip(products, core_data, additional_data):
-            product.update(core)
-            product.update(data)
+        offers = [{}, {}, {}, {}, {}]
+        for offer, core, data in zip(offers, core_data, additional_data):
+            offer.update(core)
+            offer.update(data)
 
-        self.store.update_products(revision_number=0, modified=products[0:4])
-        self.assertEqual(Product.objects.count(), 5)
+        self.store.update_offers(revision_number=0, modified=offers[0:4])
+        self.assertEqual(Offer.objects.count(), 5)
 
         self.assertListEqual(
             [True]*5,
             [
-                Product.objects.filter(store=self.store, data=data, **core).exists()
+                Offer.objects.filter(store=self.store, data=data, **core).exists()
                 for core, data in zip(core_data, additional_data)
             ]
         )
-

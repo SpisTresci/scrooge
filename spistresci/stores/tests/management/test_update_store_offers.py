@@ -7,8 +7,8 @@ from spistresci.datasource.models import XmlDataSourceModel
 from spistresci.stores.models import Store
 
 
-@patch('spistresci.stores.management.commands.update_store_products.Store.update')
-@patch('spistresci.stores.management.commands.update_store_products.Store.fetch')
+@patch('spistresci.stores.management.commands.update_store_offers.Store.update')
+@patch('spistresci.stores.management.commands.update_store_offers.Store.fetch')
 class TestUpdateStoreProducts(TestCase):
 
     def setUp(self):
@@ -27,19 +27,19 @@ class TestUpdateStoreProducts(TestCase):
         )
 
     def test__all_enabled_stores_are_updated(self, fetch, update):
-        call_command('update_store_products', '--all')
+        call_command('update_store_offers', '--all')
 
         self.assertEqual(fetch.call_count, 3)
         self.assertEqual(update.call_count, 3)
 
     def test__selected_stores_are_updated_if_they_are_enabled(self, fetch, update):
-        call_command('update_store_products', 'Foo', 'Bar', 'Baz')
+        call_command('update_store_offers', 'Foo', 'Bar', 'Baz')
 
         self.assertEqual(fetch.call_count, 2)
         self.assertEqual(update.call_count, 2)
 
     def test__name_of_stores_are_case_insensitive(self, fetch, update):
-        call_command('update_store_products', 'FOO',  'bar', 'BaZ', 'Qux')
+        call_command('update_store_offers', 'FOO',  'bar', 'BaZ', 'Qux')
 
         self.assertEqual(fetch.call_count, 3)
         self.assertEqual(update.call_count, 3)
@@ -49,10 +49,10 @@ class TestUpdateStoreProducts(TestCase):
 
         with self.assertRaises(SystemExit) as exception_cm:
             with self.assertLogs(level='WARNING') as logger_cm:
-                call_command('update_store_products', 'Foo', not_existing_stores[0], 'Bar', not_existing_stores[1])
+                call_command('update_store_offers', 'Foo', not_existing_stores[0], 'Bar', not_existing_stores[1])
 
         self.assertEqual(logger_cm.output, [
-            "ERROR:spistresci.stores.management.commands.update_store_products:"
+            "ERROR:spistresci.stores.management.commands.update_store_offers:"
             "[Store:{}] There is such store defined in database".format(name.lower()) for name in not_existing_stores
         ])
 
@@ -63,14 +63,14 @@ class TestUpdateStoreProducts(TestCase):
 
         with self.assertRaises(SystemExit) as exception_cm:
             with self.assertLogs(level='WARNING') as logger_cm:
-                call_command('update_store_products', 'Foo', 'Bar')
+                call_command('update_store_offers', 'Foo', 'Bar')
 
         self.assertIn(
-            "CRITICAL:spistresci.stores.management.commands.update_store_products:[Store:Foo] Error1",
+            "CRITICAL:spistresci.stores.management.commands.update_store_offers:[Store:Foo] Error1",
             logger_cm.output[0]
         )
         self.assertIn(
-            "CRITICAL:spistresci.stores.management.commands.update_store_products:[Store:Bar] 2nd Error",
+            "CRITICAL:spistresci.stores.management.commands.update_store_offers:[Store:Bar] 2nd Error",
             logger_cm.output[1]
         )
 
@@ -81,18 +81,18 @@ class TestUpdateStoreProducts(TestCase):
 
         with self.assertRaises(SystemExit) as exception_cm:
             with self.assertLogs(level='WARNING') as logger_cm:
-                call_command('update_store_products', 'Foo', 'Bar', 'Qux')
+                call_command('update_store_offers', 'Foo', 'Bar', 'Qux')
 
         self.assertEqual(len(logger_cm.output), 2)
         self.assertEqual(fetch.call_count, 3)
         self.assertEqual(update.call_count, 1)
 
         self.assertIn(
-            "CRITICAL:spistresci.stores.management.commands.update_store_products:[Store:Foo] Error1",
+            "CRITICAL:spistresci.stores.management.commands.update_store_offers:[Store:Foo] Error1",
             logger_cm.output[0]
         )
         self.assertIn(
-            "CRITICAL:spistresci.stores.management.commands.update_store_products:[Store:Bar] 2nd Error",
+            "CRITICAL:spistresci.stores.management.commands.update_store_offers:[Store:Bar] 2nd Error",
             logger_cm.output[1]
         )
 

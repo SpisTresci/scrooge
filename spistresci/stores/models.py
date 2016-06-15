@@ -4,7 +4,7 @@ from datetime import datetime
 from django.db import models, transaction
 from django.utils.translation import ugettext_lazy as _
 
-from spistresci.products.models import Product
+from spistresci.offers.models import Offer
 from spistresci.datasource.models import DataSourceModel
 
 
@@ -20,8 +20,8 @@ class Store(models.Model):
     url = models.URLField(help_text=_('Url to main site of store'))
     last_update_revision = models.IntegerField(null=True, default=None)
     last_successful_update = models.DateTimeField(_('Time of last successful update'), default=None, null=True)
-    last_changing_products_update = models.DateTimeField(
-        _('Time of last successful update which changed any product'),
+    last_changing_offers_update = models.DateTimeField(
+        _('Time of last successful update which changed any offer'),
         default=None,
         null=True
     )
@@ -39,16 +39,16 @@ class Store(models.Model):
     def fetch(self):
         self.data_source_instance().fetch()
 
-    def update_products(self, revision_number, added=None, deleted=None, modified=None):
+    def update_offers(self, revision_number, added=None, deleted=None, modified=None):
         added = added or []
         deleted = deleted or []
         modified = modified or []
 
         with transaction.atomic():
 
-            self.__add_products(added)
-            self.__delete_products(deleted)
-            self.__modify_products(modified)
+            self.__add_offers(added)
+            self.__delete_offers(deleted)
+            self.__modify_offers(modified)
 
             # print('After modify {}'.format(len(connection.queries)))
 
@@ -56,51 +56,51 @@ class Store(models.Model):
             self.last_successful_update = datetime.now()
 
             if added or deleted or modified:
-                self.last_changing_products_update = datetime.now()
+                self.last_changing_offers_update = datetime.now()
 
             self.save()
 
-            logger.info('[Store:{}] {} products added'.format(self.name, len(added)))
-            logger.info('[Store:{}] {} products deleted'.format(self.name, len(deleted)))
-            logger.info('[Store:{}] {} products modified'.format(self.name, len(modified)))
+            logger.info('[Store:{}] {} offers added'.format(self.name, len(added)))
+            logger.info('[Store:{}] {} offers deleted'.format(self.name, len(deleted)))
+            logger.info('[Store:{}] {} offers modified'.format(self.name, len(modified)))
 
-    def __add_products(self, products):
-        if not products:
+    def __add_offers(self, offers):
+        if not offers:
             return
 
-        field_names = Product._meta.get_all_field_names()
-        for product_dict in products:
+        field_names = Offer._meta.get_all_field_names()
+        for offer_dict in offers:
             data = {}
 
-            for product_key in list(product_dict.keys()):  # list is needed because of product_dict.pop
-                if product_key not in field_names:
-                    data[product_key] = product_dict.pop(product_key)
-                elif product_dict[product_key] is None:
-                    product_dict.pop(product_key)
+            for offer_key in list(offer_dict.keys()):  # list is needed because of offer_dict.pop
+                if offer_key not in field_names:
+                    data[offer_key] = offer_dict.pop(offer_key)
+                elif offer_dict[offer_key] is None:
+                    offer_dict.pop(offer_key)
 
 
-            product = Product.objects.create(store=self, data=data, **product_dict)  # TODO: change to bulk_create?
-            logger.info('[Store:{}] New product: {}'.format(self.name, str(product)))
+            offer = Offer.objects.create(store=self, data=data, **offer_dict)  # TODO: change to bulk_create?
+            logger.info('[Store:{}] New offer: {}'.format(self.name, str(offer)))
 
-    def __delete_products(self, products):
-        if not products:
+    def __delete_offers(self, offers):
+        if not offers:
             return
 
-        # TODO: "deactivate" product instead deleting it
-        id_of_products_to_delete = [product_dict['external_id'] for product_dict in products]
-        Product.objects.filter(external_id__in=id_of_products_to_delete).delete()
+        # TODO: "deactivate" offer instead deleting it
+        id_of_offers_to_delete = [offer_dict['external_id'] for offer_dict in offers]
+        Offer.objects.filter(external_id__in=id_of_offers_to_delete).delete()
 
-    def __modify_products(self, products):
+    def __modify_offers(self, offers):
         # TODO: change to buld_update? - https://github.com/aykut/django-bulk-update
 
         # print('Before modify {}'.format(len(connection.queries)))
-        if not products:
+        if not offers:
             return
 
         class ChangeLogger:
-            def __init__(self, store_name, product_id, logger):
+            def __init__(self, store_name, offer_id, logger):
                 self.store_name = store_name
-                self.product_id = product_id
+                self.offer_id = offer_id
                 self.logger = logger
                 self.changes = []
 
@@ -115,49 +115,49 @@ class Store(models.Model):
 
                 if not self.changes:
                     logger.warning(
-                        '[Store:{}][Product:{}]\n\t'
-                        'No changes, but product was on "modified" list'.format(self.store_name, self.product_id)
+                        '[Store:{}][Offer:{}]\n\t'
+                        'No changes, but offer was on "modified" list'.format(self.store_name, self.offer_id)
                     )
                 else:
                     logger.info(
-                        '[Store:{}][Product:{}]\n\t'
-                        '{}'.format(self.store_name, self.product_id, '\n\t'.join(self.changes))
+                        '[Store:{}][Offer:{}]\n\t'
+                        '{}'.format(self.store_name, self.offer_id, '\n\t'.join(self.changes))
                     )
 
         core_fields = []
 
-        for field in Product._meta.fields:
+        for field in Offer._meta.fields:
             if field.get_internal_type() != 'ForeignKey' and field.name not in ['data', 'id']:
                 core_fields.append(field.name)
 
-        sorted_modified = sorted(products, key=lambda d: int(d['external_id']))
+        sorted_modified = sorted(offers, key=lambda d: int(d['external_id']))
 
-        sorted_products_queryset = Product.objects.filter(
-            external_id__in=[product_dict['external_id'] for product_dict in products]
+        sorted_offers_queryset = Offer.objects.filter(
+            external_id__in=[offer_dict['external_id'] for offer_dict in offers]
         ).order_by('external_id')
 
-        for product_db, product_dict in zip(sorted_products_queryset, sorted_modified):
-            changes = ChangeLogger(self.name, product_db.external_id, logger)
-            for key in set(list(product_db.to_dict().keys()) + list(product_dict.keys())):
+        for offer_db, offer_dict in zip(sorted_offers_queryset, sorted_modified):
+            changes = ChangeLogger(self.name, offer_db.external_id, logger)
+            for key in set(list(offer_db.to_dict().keys()) + list(offer_dict.keys())):
 
                 if key in core_fields:
-                    if key not in product_dict:
-                        new_val = Product._meta.get_field_by_name(key)[0].default
+                    if key not in offer_dict:
+                        new_val = Offer._meta.get_field_by_name(key)[0].default
                         changes.add(key, '<no_value>', new_val, db_value_type='<no_type>')
-                        setattr(product_db, key, new_val)
-                    elif getattr(product_db, key) != type(getattr(product_db, key))(product_dict[key]):
-                        changes.add(key, getattr(product_db, key), product_dict[key])
-                        setattr(product_db, key, product_dict[key])
+                        setattr(offer_db, key, new_val)
+                    elif getattr(offer_db, key) != type(getattr(offer_db, key))(offer_dict[key]):
+                        changes.add(key, getattr(offer_db, key), offer_dict[key])
+                        setattr(offer_db, key, offer_dict[key])
                 else:
-                    if key in product_db.data and key in product_dict and product_db.data[key] != product_dict[key]:
-                        changes.add(key, product_db.data[key], product_dict[key])
-                        product_db.data[key] = product_dict[key]
-                    elif key in product_db.data and key not in product_dict:
-                        changes.add(key, product_db.data[key], '<no_value>', new_value_type='<no_type>')
-                        del product_db.data[key]
-                    elif key not in product_db.data and key in product_dict:
-                        changes.add(key, '<no_value>', product_dict[key], db_value_type='<no_type>')
-                        product_db.data[key] = product_dict[key]  # TODO: add initializing by type .price = Decimal(price)
+                    if key in offer_db.data and key in offer_dict and offer_db.data[key] != offer_dict[key]:
+                        changes.add(key, offer_db.data[key], offer_dict[key])
+                        offer_db.data[key] = offer_dict[key]
+                    elif key in offer_db.data and key not in offer_dict:
+                        changes.add(key, offer_db.data[key], '<no_value>', new_value_type='<no_type>')
+                        del offer_db.data[key]
+                    elif key not in offer_db.data and key in offer_dict:
+                        changes.add(key, '<no_value>', offer_dict[key], db_value_type='<no_type>')
+                        offer_db.data[key] = offer_dict[key]  # TODO: add initializing by type .price = Decimal(price)
 
             changes.log()
-            product_db.save()
+            offer_db.save()

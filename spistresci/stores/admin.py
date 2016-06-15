@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.contrib.humanize.templatetags.humanize import naturaltime
 
-from spistresci.products.models import Product
+from spistresci.offers.models import Offer
 from spistresci.stores.models import Store
 
 
@@ -12,10 +12,10 @@ get_enabled.short_description = 'Enabled'
 get_enabled.boolean = True
 
 
-def get_number_of_products(obj):
-    return Product.objects.filter(store=obj).count()
+def get_number_of_offers(obj):
+    return Offer.objects.filter(store=obj).count()
 
-get_number_of_products.short_description = 'Number of products'
+get_number_of_offers.short_description = 'Number of offers'
 
 
 def get_last_successful_update(obj):
@@ -24,10 +24,10 @@ def get_last_successful_update(obj):
 get_last_successful_update.short_description = 'Updated successfully last time'
 
 
-def get_last_changing_products_update(obj):
-    return naturaltime(obj.last_changing_products_update)
+def get_last_changing_offers_update(obj):
+    return naturaltime(obj.last_changing_offers_update)
 
-get_last_changing_products_update.short_description = 'Product(s) changed last time'
+get_last_changing_offers_update.short_description = 'Offer(s) changed last time'
 
 
 def get_data_source(obj):
@@ -40,13 +40,13 @@ class StoreAdmin(admin.ModelAdmin):
     list_display = (
         'name',
         get_enabled,
-        get_number_of_products,
+        get_number_of_offers,
         get_last_successful_update,
-        get_last_changing_products_update,
+        get_last_changing_offers_update,
         get_data_source
     )
 
     def get_readonly_fields(self, request, obj=None):
-        return ['last_update_revision', 'last_successful_update', 'last_changing_products_update']
+        return ['last_update_revision', 'last_successful_update', 'last_changing_offers_update']
 
 admin.site.register(Store, StoreAdmin)

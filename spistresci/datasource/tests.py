@@ -31,21 +31,21 @@ class TestXmlDataSource(TestCase):
         data_storage_manager.assert_has_calls([call(self.store.name)])
         data_storage_manager.return_value.save.assert_has_calls([call('foo.xml')])
 
-    @patch('spistresci.stores.models.Store.update_products')
+    @patch('spistresci.stores.models.Store.update_offers')
     @patch('spistresci.datasource.generic.DataStorageManager')
-    def test_update_should_update_data_only_if_new_revision_is_available(self, data_storage_manager, update_products):
+    def test_update_should_update_data_only_if_new_revision_is_available(self, data_storage_manager, update_offers):
         self.store.last_update_revision = 42
         self.store.save()
 
-        data_storage_manager.return_value.get.return_value = '<products></products>'
+        data_storage_manager.return_value.get.return_value = '<offers></offers>'
 
         data_storage_manager.return_value.last_revision_number.return_value = 42
         self.store.update()
-        self.assertEqual(update_products.call_count, 0)
+        self.assertEqual(update_offers.call_count, 0)
 
         data_storage_manager.return_value.last_revision_number.return_value = 43
         self.store.update()
-        update_products.assert_called_once_with(revision_number=43, added=[], deleted=[], modified=[])
+        update_offers.assert_called_once_with(revision_number=43, added=[], deleted=[], modified=[])
 
     @patch('spistresci.datasource.generic.DataStorageManager')
     def test_update_passes_no_revision_exception_if_there_is_no_data_in_ds(self, data_storage_manager):
@@ -59,13 +59,13 @@ class TestUpdateOfXmlDataSource(TestCase):
 
     def setUp(self):
         self.patcher1 = patch('spistresci.datasource.generic.DataStorageManager')
-        self.patcher2 = patch('spistresci.stores.models.Store.update_products')
+        self.patcher2 = patch('spistresci.stores.models.Store.update_offers')
         self.addCleanup(self.patcher1.stop)
         self.addCleanup(self.patcher2.stop)
         self.data_storage_manager = self.patcher1.start()
-        self.update_products = self.patcher2.start()
+        self.update_offers = self.patcher2.start()
 
-        data_source = XmlDataSourceModel.objects.create(name='Foo', offers_xpath='/products/product', url='http://foo.com/xml')
+        data_source = XmlDataSourceModel.objects.create(name='Foo', offers_xpath='/offers/offer', url='http://foo.com/xml')
         self.store = Store.objects.create(name='Foo', data_source=data_source, last_update_revision=0)
 
         XmlDataField.objects.create(name='external_id', xpath='./id/text()', data_source=data_source)
@@ -74,10 +74,10 @@ class TestUpdateOfXmlDataSource(TestCase):
         self.data_storage_manager.return_value.last_revision_number.return_value = 1
 
         self.rev0 = '''
-            <products>
-                <product><id>1</id><name>AAA</name></product>
-                <product><id>2</id><name>BBB</name></product>
-            </products>
+            <offers>
+                <offer><id>1</id><name>AAA</name></offer>
+                <offer><id>2</id><name>BBB</name></offer>
+            </offers>
             '''
         self.rev1 = None
 
@@ -98,14 +98,14 @@ class TestUpdateOfXmlDataSource(TestCase):
             else:
                 self.assertEqual(value, expected[name])
 
-    def test_update__products_were_added_to_existing_store(self):
+    def test_update__offers_were_added_to_existing_store(self):
         self.rev1 = '''
-            <products>
-                <product><id>1</id><name>AAA</name></product>
-                <product><id>2</id><name>BBB</name></product>
-                <product><id>3</id><name>CCC</name></product>
-                <product><id>4</id><name>DDD</name></product>
-            </products>
+            <offers>
+                <offer><id>1</id><name>AAA</name></offer>
+                <offer><id>2</id><name>BBB</name></offer>
+                <offer><id>3</id><name>CCC</name></offer>
+                <offer><id>4</id><name>DDD</name></offer>
+            </offers>
             '''
 
         self.store.update()
@@ -120,15 +120,15 @@ class TestUpdateOfXmlDataSource(TestCase):
             'revision_number': 1
         }
 
-        self.assertEqual(self.update_products.call_count, 1)
-        self.assert_helper(self.update_products.call_args, expected)
+        self.assertEqual(self.update_offers.call_count, 1)
+        self.assert_helper(self.update_offers.call_args, expected)
 
-    def test_update__products_were_modified(self):
+    def test_update__offers_were_modified(self):
         self.rev1 = '''
-            <products>
-                <product><id>1</id><name>AAA - aaa</name></product>
-                <product><id>2</id><name>BBB - bbb</name></product>
-            </products>
+            <offers>
+                <offer><id>1</id><name>AAA - aaa</name></offer>
+                <offer><id>2</id><name>BBB - bbb</name></offer>
+            </offers>
             '''
 
         self.store.update()
@@ -143,11 +143,11 @@ class TestUpdateOfXmlDataSource(TestCase):
             'revision_number': 1
         }
 
-        self.assertEqual(self.update_products.call_count, 1)
-        self.assert_helper(self.update_products.call_args, expected)
+        self.assertEqual(self.update_offers.call_count, 1)
+        self.assert_helper(self.update_offers.call_args, expected)
 
-    def test_update__products_were_deleted(self):
-        self.rev1 = "<products></products>"
+    def test_update__offers_were_deleted(self):
+        self.rev1 = "<offers></offers>"
 
         self.store.update()
 
@@ -161,55 +161,55 @@ class TestUpdateOfXmlDataSource(TestCase):
             'revision_number': 1
         }
 
-        self.assertEqual(self.update_products.call_count, 1)
-        self.assert_helper(self.update_products.call_args, expected)
+        self.assertEqual(self.update_offers.call_count, 1)
+        self.assert_helper(self.update_offers.call_args, expected)
 
-    def test_update__products_were_added_modified_and_deleted(self):
+    def test_update__offers_were_added_modified_and_deleted(self):
         self.rev1 = '''
-            <products>
-                <product><id>1</id><name>AAA - aaa</name></product>
-                <product><id>3</id><name>CCC</name></product>
-            </products>
+            <offers>
+                <offer><id>1</id><name>AAA - aaa</name></offer>
+                <offer><id>3</id><name>CCC</name></offer>
+            </offers>
             '''
 
         self.store.update()
 
-        self.update_products.assert_called_once_with(
+        self.update_offers.assert_called_once_with(
             revision_number=1,
             added=[{'external_id': '3', 'name': 'CCC'}],
             deleted=[{'external_id': '2', 'name': 'BBB'}],
             modified=[{'external_id': '1', 'name': 'AAA - aaa'}]
         )
 
-    def test_update__products_were_not_changed(self):
+    def test_update__offers_were_not_changed(self):
         self.rev1 = self.rev0
         self.store.update()
-        self.update_products.assert_called_once_with(revision_number=1, added=[], deleted=[], modified=[])
+        self.update_offers.assert_called_once_with(revision_number=1, added=[], deleted=[], modified=[])
 
-    def test_update__duplicated_products_are_ignored(self):
+    def test_update__duplicated_offers_are_ignored(self):
         self.rev1 = '''
-            <products>
-                <product><id>1</id><name>AAA</name></product>
-                <product><id>2</id><name>BBB</name></product>
+            <offers>
+                <offer><id>1</id><name>AAA</name></offer>
+                <offer><id>2</id><name>BBB</name></offer>
 
-                <product><id>3</id><name>CCC</name></product>
-                <product><id>3</id><name>CCC - 2</name></product>
+                <offer><id>3</id><name>CCC</name></offer>
+                <offer><id>3</id><name>CCC - 2</name></offer>
 
-                <product><id>4</id><name>DDD</name></product>
-                <product><id>4</id><name>DDD - 2</name></product>
-                <product><id>4</id><name>DDD - 3</name></product>
+                <offer><id>4</id><name>DDD</name></offer>
+                <offer><id>4</id><name>DDD - 2</name></offer>
+                <offer><id>4</id><name>DDD - 3</name></offer>
 
-                <product><id>5</id><name>EEE</name></product>
-            </products>
+                <offer><id>5</id><name>EEE</name></offer>
+            </offers>
             '''
 
         with self.assertLogs(level='WARNING') as cm:
             self.store.update()
 
         self.assertEqual(cm.output, [
-            'WARNING:spistresci.datasource.generic:[Store:Foo] Product with external_id "3" is not unique!',
-            'WARNING:spistresci.datasource.generic:[Store:Foo] Product with external_id "4" is not unique!',
-            'WARNING:spistresci.datasource.generic:[Store:Foo] Product with external_id "4" is not unique!'
+            'WARNING:spistresci.datasource.generic:[Store:Foo] Offer with external_id "3" is not unique!',
+            'WARNING:spistresci.datasource.generic:[Store:Foo] Offer with external_id "4" is not unique!',
+            'WARNING:spistresci.datasource.generic:[Store:Foo] Offer with external_id "4" is not unique!'
         ])
 
         expected = {
@@ -223,4 +223,4 @@ class TestUpdateOfXmlDataSource(TestCase):
             'revision_number': 1
         }
 
-        self.assert_helper(self.update_products.call_args, expected)
+        self.assert_helper(self.update_offers.call_args, expected)
