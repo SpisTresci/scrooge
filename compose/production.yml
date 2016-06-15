@@ -74,3 +74,11 @@ services:
       - redis
     command: celery -A spistresci.taskapp beat -l INFO
     network_mode: 'bridge'
+
+  docs:
+    build:
+      context: ..
+      dockerfile: compose/docs/Dockerfile
+    environment:
+      - VIRTUAL_HOST=docs.${HOST_ADDRESS}
+    network_mode: 'bridge'
