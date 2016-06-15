@@ -39,7 +39,7 @@ class TestStore(TestCase):
 
         self.store.update_products(revision_number=0, added=[product_1])
         self.assertEqual(Product.objects.count(), 1)
-        self.assertTrue(Product.objects.filter(store=self.store, **product_1, price=Decimal(0)).exists())
+        self.assertTrue(Product.objects.filter(store=self.store, price=Decimal(0), **product_1).exists())
 
     def test_update_products__additional_data_stored_in_data_json_field(self):
         core_data_1 = {
@@ -59,7 +59,7 @@ class TestStore(TestCase):
         product_1.update(additional_data_1)
         self.store.update_products(revision_number=0, added=[product_1])
         self.assertEqual(Product.objects.count(), 1)
-        self.assertTrue(Product.objects.filter(store=self.store, **core_data_1, data=additional_data_1).exists())
+        self.assertTrue(Product.objects.filter(store=self.store, data=additional_data_1, **core_data_1).exists())
 
     def test_update_products__deletes_products(self):
         products = [
@@ -113,7 +113,7 @@ class TestStore(TestCase):
 
         ]
         Product.objects.bulk_create([
-            Product(store=self.store, **core, data=data)
+            Product(store=self.store, data=data, **core)
             for core, data in zip(core_data, additional_data)
         ])
 
@@ -133,7 +133,7 @@ class TestStore(TestCase):
         self.assertListEqual(
             [True]*5,
             [
-                Product.objects.filter(store=self.store, **core, data=data).exists()
+                Product.objects.filter(store=self.store, data=data, **core).exists()
                 for core, data in zip(core_data, additional_data)
             ]
         )
