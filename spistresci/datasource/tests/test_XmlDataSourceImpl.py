@@ -8,7 +8,7 @@ from spistresci.stores.models import Store
 from spistresci.stores.utils.datastoragemanager import DataStorageManager
 
 
-class TestXmlDataSource(TestCase):
+class TestXmlDataSourceImpl(TestCase):
 
     def setUp(self):
         data_source = XmlDataSourceModel.objects.create(name='Foo', offers_xpath='/whatever', url='http://foo.com/xml')
@@ -55,7 +55,7 @@ class TestXmlDataSource(TestCase):
             self.store.update()
 
 
-class TestUpdateOfXmlDataSource(TestCase):
+class TestUpdateOfXmlDataSourceImpl(TestCase):
 
     def setUp(self):
         self.patcher1 = patch('spistresci.datasource.generic.DataStorageManager')
@@ -65,18 +65,22 @@ class TestUpdateOfXmlDataSource(TestCase):
         self.data_storage_manager = self.patcher1.start()
         self.update_offers = self.patcher2.start()
 
-        data_source = XmlDataSourceModel.objects.create(name='Foo', offers_xpath='/offers/offer', url='http://foo.com/xml')
-        self.store = Store.objects.create(name='Foo', data_source=data_source, last_update_revision=0)
-
-        XmlDataField.objects.create(name='external_id', xpath='./id/text()', data_source=data_source)
-        XmlDataField.objects.create(name='name', xpath='./name/text()', data_source=data_source)
+        self.data_source = XmlDataSourceModel.objects.create(name='Foo', offers_xpath='/offers/offer', url='http://foo.com/xml')
+        XmlDataField.objects.create(name='external_id', xpath='./id/text()', data_source=self.data_source)
+        XmlDataField.objects.create(name='name', xpath='./name/text()', data_source=self.data_source)
+        self.store = Store.objects.create(
+            name='Foo',
+            data_source=self.data_source,
+            last_update_revision=0,
+            last_update_data_source_version_hash=self.data_source.version_hash
+        )
 
         self.data_storage_manager.return_value.last_revision_number.return_value = 1
 
         self.rev0 = '''
             <offers>
-                <offer><id>1</id><name>AAA</name></offer>
-                <offer><id>2</id><name>BBB</name></offer>
+                <offer><id>1</id><name>AAA</name><price>0.00</price></offer>
+                <offer><id>2</id><name>BBB</name><price>9.99</price></offer>
             </offers>
             '''
         self.rev1 = None
@@ -223,4 +227,23 @@ class TestUpdateOfXmlDataSource(TestCase):
             'revision_number': 1
         }
 
+        self.assert_helper(self.update_offers.call_args, expected)
+
+    def test_update__redefinition_of_datasource_should_cause_update_of_all_offers(self):
+        XmlDataField.objects.create(name='price', xpath='./price/text()', data_source=self.data_source)
+        self.rev1 = self.rev0
+
+        self.store.update()
+
+        expected = {
+            'added': [],
+            'deleted': [],
+            'modified': [
+                {'external_id': '1', 'name': 'AAA', 'price': '0.00'},
+                {'external_id': '2', 'name': 'BBB', 'price': '9.99'},
+            ],
+            'revision_number': 1
+        }
+
+        self.assertEqual(self.update_offers.call_count, 1)
         self.assert_helper(self.update_offers.call_args, expected)

@@ -19,6 +19,7 @@ class Store(models.Model):
     name = models.CharField(max_length=32)
     url = models.URLField(help_text=_('Url to main site of store'))
     last_update_revision = models.IntegerField(null=True, default=None)
+    last_update_data_source_version_hash = models.CharField(max_length=32, editable=False, default='')
     last_successful_update = models.DateTimeField(_('Time of last successful update'), default=None, null=True)
     last_changing_offers_update = models.DateTimeField(
         _('Time of last successful update which changed any offer'),
@@ -54,6 +55,7 @@ class Store(models.Model):
 
             self.last_update_revision = revision_number
             self.last_successful_update = datetime.now()
+            self.last_update_data_source_version_hash = self.data_source.version_hash
 
             if added or deleted or modified:
                 self.last_changing_offers_update = datetime.now()
@@ -102,26 +104,35 @@ class Store(models.Model):
                 self.store_name = store_name
                 self.offer_id = offer_id
                 self.logger = logger
-                self.changes = []
+                self.changes__info = []
+                self.changes__warn = []
 
-            def add(self, key, db_value, new_value, db_value_type=None, new_value_type=None):
+            def add(self, key, db_value, new_value, db_value_type=None, new_value_type=None, mode='info'):
                 db_value_type = db_value_type or type(db_value)
                 new_value_type = new_value_type or type(new_value)
-                self.changes.append(
+                changes = self.changes__info if mode == 'info' else self.changes__warn
+                changes.append(
                     '[{}] {} ({}) => {} ({})'.format(key, db_value, db_value_type, new_value, new_value_type)
                 )
 
             def log(self):
 
-                if not self.changes:
+                if not self.changes__info and not self.changes__warn:
                     logger.warning(
                         '[Store:{}][Offer:{}]\n\t'
                         'No changes, but offer was on "modified" list'.format(self.store_name, self.offer_id)
                     )
-                else:
+
+                if self.changes__info:
                     logger.info(
                         '[Store:{}][Offer:{}]\n\t'
-                        '{}'.format(self.store_name, self.offer_id, '\n\t'.join(self.changes))
+                        '{}'.format(self.store_name, self.offer_id, '\n\t'.join(self.changes__info))
+                    )
+
+                if self.changes__warn:
+                    logger.warn(
+                        '[Store:{}][Offer:{}]\n\t'
+                        '{}'.format(self.store_name, self.offer_id, '\n\t'.join(self.changes__warn))
                     )
 
         core_fields = []
@@ -141,10 +152,13 @@ class Store(models.Model):
             for key in set(list(offer_db.to_dict().keys()) + list(offer_dict.keys())):
 
                 if key in core_fields:
+                    default_value = Offer._meta.get_field_by_name(key)[0].default
                     if key not in offer_dict:
-                        new_val = Offer._meta.get_field_by_name(key)[0].default
-                        changes.add(key, '<no_value>', new_val, db_value_type='<no_type>')
-                        setattr(offer_db, key, new_val)
+                        changes.add(key, '<no_value>', default_value, db_value_type='<no_type>')
+                        setattr(offer_db, key, default_value)
+                    elif offer_dict[key] is None:
+                        changes.add(key, getattr(offer_db, key), default_value, mode='warn')
+                        setattr(offer_db, key, default_value)
                     elif getattr(offer_db, key) != type(getattr(offer_db, key))(offer_dict[key]):
                         changes.add(key, getattr(offer_db, key), offer_dict[key])
                         setattr(offer_db, key, offer_dict[key])

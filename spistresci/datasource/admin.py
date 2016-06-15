@@ -74,4 +74,8 @@ class XmlDataNotRequiredFieldInline(admin.TabularInline):
 class XmlDataSourceModelAdmin(admin.ModelAdmin):
     inlines = [XmlDataRequiredFieldInline, XmlDataNotRequiredFieldInline]
 
+    def get_readonly_fields(self, request, obj=None):
+        return ['version_hash']
+
+
 admin.site.register(XmlDataSourceModel, XmlDataSourceModelAdmin)
