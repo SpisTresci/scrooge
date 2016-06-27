@@ -16,6 +16,11 @@ def migrate_fields(apps, schema_editor):
     XmlDataField = apps.get_model("datasource", "XmlDataField")
     DataSourceFieldName = apps.get_model("datasource", "DataSourceFieldName")
 
+    # add required DSFNs
+    for name in ['external_id', 'name', 'url', 'price']:
+        DataSourceFieldName.objects.get_or_create(name=name)
+
+    # migrate existing
     xml_data_fields = XmlDataField.objects.all()
 
     for xml_data_field in xml_data_fields:
