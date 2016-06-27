@@ -1,6 +1,6 @@
 from test_plus.test import TestCase
 
-from spistresci.datasource.models import XmlDataSourceModel, XmlDataField
+from spistresci.datasource.models import XmlDataSourceModel, XmlDataField, DataSourceFieldName
 
 
 class TestXmlDataSourceModel(TestCase):
@@ -28,8 +28,13 @@ class TestXmlDataSourceModel(TestCase):
             offers_xpath='/offers/offer',
             url='http://foo.com/xml'
         )
-        f1 = XmlDataField.objects.create(name='external_id', xpath='./id/text()', data_source=data_source)
-        f2 = XmlDataField.objects.create(name='name', xpath='./name/text()', data_source=data_source)
+
+        external_id, _ = DataSourceFieldName.objects.get_or_create(name='external_id')
+        name, _ = DataSourceFieldName.objects.get_or_create(name='name')
+        name2, _ = DataSourceFieldName.objects.get_or_create(name='name2')
+
+        f1 = XmlDataField.objects.create(name=external_id, xpath='./id/text()', data_source=data_source)
+        f2 = XmlDataField.objects.create(name=name, xpath='./name/text()', data_source=data_source)
 
         version_hash = data_source.version_hash
         f1.xpath = './new_id/text()'
@@ -37,6 +42,6 @@ class TestXmlDataSourceModel(TestCase):
         self.assertNotEqual(version_hash, data_source.version_hash)
         version_hash = data_source.version_hash
 
-        f2.name = 'new_name_the_same_xpath'
+        f2.name = name2
         f2.save()
         self.assertNotEqual(version_hash, data_source.version_hash)

@@ -3,13 +3,13 @@ from django.db.models.fields import NOT_PROVIDED
 from django.forms import ValidationError
 from django.forms.models import BaseInlineFormSet
 
-from spistresci.datasource.models import XmlDataSourceModel, XmlDataField
+from spistresci.datasource.models import XmlDataSourceModel, XmlDataField, DataSourceFieldName
 from spistresci.offers.models import Offer
 
 
 def dict_of_required_fields():
     return [
-        {'name': field.name}
+        {'name': DataSourceFieldName.objects.get(name=field.name).id}
         for field in Offer._meta.fields
         if field.name not in ['id', 'store', 'data']
     ]
@@ -26,8 +26,11 @@ class RequiredInlineFormSet(BaseInlineFormSet):
         form = super(RequiredInlineFormSet, self)._construct_form(i, **kwargs)
         if 'name' in form.initial and form.initial['name'] in [initial['name'] for initial in self.initial_data]:
             form.fields['name'].disabled = True
+            form.fields['name'].queryset = DataSourceFieldName.objects.filter(id=form.initial['name'])
+            form.fields['name'].widget.can_add_related = False
+            form.fields['name'].widget.can_change_related = False
 
-        if 'name' in form.initial and form.initial['name'] == 'external_id':
+        if 'name' in form.initial and form.initial['name'] == DataSourceFieldName.objects.get(name='external_id').id:
             form.fields['xpath'].required = True
 
         self.can_delete = False
@@ -43,6 +46,23 @@ class RequiredInlineFormSet(BaseInlineFormSet):
 
 
 class NotRequiredInlineFormSet(BaseInlineFormSet):
+    def _construct_form(self, i, **kwargs):
+        form = super(NotRequiredInlineFormSet, self)._construct_form(i, **kwargs)
+
+        qs = DataSourceFieldName.objects.exclude(name__in=list_of_required_fields())
+
+        if self.instance.id:
+            qs = qs.exclude(
+                id__in=[
+                    field.name.id
+                    for field in self.instance.child.fields
+                    if not form.initial or field.name.id != form.initial['name']
+                ]
+            )
+
+        form.fields['name'].queryset = qs
+        return form
+
     def clean(self):
         super(NotRequiredInlineFormSet, self).clean()
         for form in self.forms:
@@ -79,3 +99,4 @@ class XmlDataSourceModelAdmin(admin.ModelAdmin):
 
 
 admin.site.register(XmlDataSourceModel, XmlDataSourceModelAdmin)
+admin.site.register(DataSourceFieldName)

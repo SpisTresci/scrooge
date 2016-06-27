@@ -3,7 +3,7 @@ from unittest.mock import patch, Mock, MagicMock, call
 from test_plus.test import TestCase
 
 from spistresci.datasource.generic import XmlDataSourceImpl
-from spistresci.datasource.models import XmlDataSourceModel, XmlDataField
+from spistresci.datasource.models import XmlDataSourceModel, XmlDataField, DataSourceFieldName
 from spistresci.stores.models import Store
 from spistresci.stores.utils.datastoragemanager import DataStorageManager
 
@@ -66,8 +66,12 @@ class TestUpdateOfXmlDataSourceImpl(TestCase):
         self.update_offers = self.patcher2.start()
 
         self.data_source = XmlDataSourceModel.objects.create(name='Foo', offers_xpath='/offers/offer', url='http://foo.com/xml')
-        XmlDataField.objects.create(name='external_id', xpath='./id/text()', data_source=self.data_source)
-        XmlDataField.objects.create(name='name', xpath='./name/text()', data_source=self.data_source)
+
+        external_id, _ = DataSourceFieldName.objects.get_or_create(name='external_id')
+        name, _ = DataSourceFieldName.objects.get_or_create(name='name')
+
+        XmlDataField.objects.create(name=external_id, xpath='./id/text()', data_source=self.data_source)
+        XmlDataField.objects.create(name=name, xpath='./name/text()', data_source=self.data_source)
         self.store = Store.objects.create(
             name='Foo',
             data_source=self.data_source,
@@ -230,7 +234,8 @@ class TestUpdateOfXmlDataSourceImpl(TestCase):
         self.assert_helper(self.update_offers.call_args, expected)
 
     def test_update__redefinition_of_datasource_should_cause_update_of_all_offers(self):
-        XmlDataField.objects.create(name='price', xpath='./price/text()', data_source=self.data_source)
+        price, _ = DataSourceFieldName.objects.get_or_create(name='price')
+        XmlDataField.objects.create(name=price, xpath='./price/text()', data_source=self.data_source)
         self.rev1 = self.rev0
 
         self.store.update()
