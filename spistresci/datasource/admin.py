@@ -1,18 +1,29 @@
+import logging
 from django.contrib import admin
-from django.db.models.fields import NOT_PROVIDED
+from django.db.utils import ProgrammingError
 from django.forms import ValidationError
 from django.forms.models import BaseInlineFormSet
 
 from spistresci.datasource.models import XmlDataSourceModel, XmlDataField, DataSourceFieldName
 from spistresci.offers.models import Offer
 
+logger = logging.getLogger(__name__)
+
 
 def dict_of_required_fields():
-    return [
-        {'name': DataSourceFieldName.objects.get(name=field.name).id}
-        for field in Offer._meta.fields
-        if field.name not in ['id', 'store', 'data']
-    ]
+    fields = []
+    try:
+        return [
+            {
+                'name': DataSourceFieldName.objects.get(name=field.name).id
+            }
+            for field in Offer._meta.fields
+            if field.name not in ['id', 'store', 'data']
+        ]
+    except ProgrammingError as e:
+        logger.warning('Some migrations are not applied!')
+
+    return fields
 
 
 def list_of_required_fields():
