@@ -61,6 +61,13 @@ class DataSourceModel(models.Model):
         return str(self.child)
 
 
+class DataSourceFieldName(models.Model):
+    name = models.CharField(_('Name'), max_length=32, unique=True)
+
+    def __str__(self):
+        return self.name
+
+
 class XmlDataSourceModel(DataSourceModel):
     SINGLE_XML = 1
     DATA_SOURCE_TYPE_CHOICES = (
@@ -128,7 +135,7 @@ def xpath_validator(value):
 
 
 class XmlDataField(models.Model):
-    name = models.CharField(max_length=32)
+    name = models.ForeignKey(DataSourceFieldName, null=True)
     xpath = models.CharField(
         default='',
         blank=True,

@@ -156,17 +156,17 @@ class XmlDataSourceImpl(DataSourceImpl):
         offer_dict = {}
         for field in self.store.data_source.child.fields:
             if not field.xpath:
-                offer_dict[field.name] = None
+                offer_dict[field.name.name] = None
                 continue
 
-            offer_dict[field.name] = node.xpath(field.xpath)
+            offer_dict[field.name.name] = node.xpath(field.xpath)
 
-            if len(offer_dict[field.name]) == 0:
-                offer_dict[field.name] = None
-            elif len(offer_dict[field.name]) == 1:
-                offer_dict[field.name] = self._node_to_string(offer_dict[field.name][0])
+            if len(offer_dict[field.name.name]) == 0:
+                offer_dict[field.name.name] = None
+            elif len(offer_dict[field.name.name]) == 1:
+                offer_dict[field.name.name] = self._node_to_string(offer_dict[field.name.name][0])
             else:
-                offer_dict[field.name] = [self._node_to_string(li) for li in offer_dict[field.name]]
+                offer_dict[field.name.name] = [self._node_to_string(li) for li in offer_dict[field.name.name]]
 
         return offer_dict
 
