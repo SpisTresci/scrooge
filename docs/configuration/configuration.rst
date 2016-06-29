@@ -116,9 +116,14 @@ Required XML Data Fields
         If xpath will not be properly resolved, default value will be used.
 
 Additional XML Data Fields
-    .. image:: images/datasource_additional_xmldatafields.png
-
-    The great news is that you can store any data about offers/products in the database! :) The only thing which you have to do to is provide the *name* for the property and information how to extract value of this property from XML document (by *xpath*)
+    The great news is that you can store any data about offers/products in the database! :) The only thing which you have to do to choose custom datafield name from dropdown is **create new** `Data source field name`.
+    
+    .. image:: images/datasource_field_name_add.png
+    .. image:: images/datasource_field_name_create_photo.png
+    
+    and then you will be able to choose this name from dropdown list and provide an information how to extract value of this property from XML document (by *xpath*)
+    
+    .. image:: images/datasource_dropdown_photo.png
 
     For example, to store information about *size* of product in your database, just create new field with name *size* (or 'dimensions' if you prefer - name of property do not have to be exactly the same as it is in XML document of specific store). You will be able to fetch all additional data stored in database via API.
 
