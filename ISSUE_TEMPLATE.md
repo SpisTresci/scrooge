@@ -1,14 +1,15 @@
-**1. Specifications**
-
-- version of the project:
-
-- operating system:
+**Specifications (browser, OS, etc):**
 
 
-**2. Steps to reproduce the problem**
+**Steps to reproduce the problem:**
+
+1. 
+2. 
+3. 
+
+**Actual behavior:**
 
 
-**3. Actual behavior**
 
+**Expected behavior:**
 
-**4. Expected behavior**
