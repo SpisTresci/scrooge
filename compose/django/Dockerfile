@@ -2,7 +2,7 @@ FROM python:3.5
 
 ENV PYTHONUNBUFFERED 1
 
-RUN apt-get update && apt-get install -y cron rsyslog
+RUN apt-get update && apt-get install -y cron rsyslog netcat
 
 # Requirements have to be pulled and installed here, otherwise caching won't work
 COPY ./requirements /requirements
