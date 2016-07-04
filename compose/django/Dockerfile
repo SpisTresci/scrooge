@@ -16,6 +16,7 @@ RUN chown -R django /app
 COPY ./compose/django/gunicorn.sh /gunicorn.sh
 COPY ./compose/django/entrypoint.sh /entrypoint.sh
 COPY ./compose/django/cron.sh /cron.sh
+COPY ./compose/wait_to_start.sh /wait_to_start.sh
 RUN sed -i 's/\r//' /entrypoint.sh
 RUN sed -i 's/\r//' /gunicorn.sh
 RUN sed -i 's/\r//' /cron.sh
