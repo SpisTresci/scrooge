@@ -5,28 +5,28 @@
 wheel==0.29.0
 
 # Bleeding edge Django
-django==1.9.4
+django==1.9.7
 
 # Configuration
 django-environ==0.4.0
 django-secure==1.0.1
-whitenoise==2.0.6
+whitenoise==3.2
 
 
 # Forms
-django-braces==1.8.1
+django-braces==1.9.0
 django-crispy-forms==1.6.0
-django-floppyforms==1.6.1
+django-floppyforms==1.6.2
 
 # Models
-django-model-utils==2.4
+django-model-utils==2.5
 
 # Images
-Pillow==3.1.1
+Pillow==3.3.0
 
 # For user registration, either via email or social
 # Well-built with regular release cycles!
-django-allauth==0.24.1
+django-allauth==0.25.2
 
 
 # Python-PostgreSQL Database Adapter
@@ -37,20 +37,20 @@ unicode-slugify==0.1.3
 django-autoslug==1.9.3
 
 # Time zones support
-pytz==2015.7
+pytz==2016.4
 
 # Redis support
-django-redis==4.3.0
+django-redis==4.4.3
 redis>=2.10.0
 
 
-celery==3.1.21
+celery==3.1.23
 
 
 # Your custom requirements go here
 django-docopt-command==0.2.2
 PyYAML==3.11
-GitPython==1.0.2
+GitPython==2.0.6
 lxml==3.6.0
 
 # django-chroniker==0.8.5
