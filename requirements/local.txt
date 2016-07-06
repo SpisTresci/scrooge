@@ -6,7 +6,7 @@ Sphinx
 django-extensions==1.6.1
 Werkzeug==0.11.4
 django-test-plus==1.0.12
-factory_boy==2.6.1
+factory-boy==2.7.0
 colorlog==2.6.3
 
 # django-debug-toolbar that works with Django 1.5+
