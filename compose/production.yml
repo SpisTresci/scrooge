@@ -22,9 +22,14 @@ services:
     links:
       - postgres
       - redis
-    command: /gunicorn.sh
+    command: /wait_to_start.sh
     network_mode: 'bridge'
     env_file: ../.env
+    environment:
+      - WAIT_COMMAND=nc -z postgres 5432
+      - WAIT_START_CMD=/gunicorn.sh
+      - WAIT_SLEEP=2
+      - WAIT_LOOPS=20
 
   django-chroniker:
     build:
