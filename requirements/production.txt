@@ -24,7 +24,7 @@ django-mailgun==0.8.0
 
 # Raven is the Sentry client
 # --------------------------
-raven
+raven==5.24.2
 
 
 
