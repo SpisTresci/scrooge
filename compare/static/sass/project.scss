@@ -1,4 +1,12 @@
+
+
+
+
 // project specific CSS goes here
+
+////////////////////////////////
+		//Variables//
+////////////////////////////////
 
 // Alert colors
 
@@ -8,6 +16,10 @@ $black: #000;
 $pink: #f2dede;
 $dark-pink: #eed3d7;
 $red: #b94a48;
+
+////////////////////////////////
+		//Alerts//
+////////////////////////////////
 
 // bootstrap alert CSS, translated to the django-standard levels of
 // debug, info, success, warning, error
@@ -22,30 +34,4 @@ $red: #b94a48;
   background-color: $pink;
   border-color: $dark-pink;
   color: $red;
-}
-
-// This is a fix for the bootstrap4 alpha release
-
-@media (max-width: 47.9em) {
-  .navbar-nav .nav-item {
-    display: inline-block;
-    float: none;
-    width: 100%;
-  }
-
-  .navbar-nav .nav-item + .nav-item {
-    margin-left: 0;
-  }
-
-  .nav.navbar-nav.pull-xs-right {
-    float: none !important;
-  }
-}
-
-// Display django-debug-toolbar.
-// See https://github.com/django-debug-toolbar/django-debug-toolbar/issues/742
-// and https://github.com/pydanny/cookiecutter-django/issues/317
-
-[hidden][style="display: block;"] {
-  display: block !important;
 }
