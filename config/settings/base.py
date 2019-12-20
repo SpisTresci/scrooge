@@ -75,6 +75,10 @@ THIRD_PARTY_APPS = [
 LOCAL_APPS = [
     "compare.users.apps.UsersConfig",
     # Your stuff: custom apps go here
+    'compare.users.apps.offers',
+    'compare.users.apps.products',
+    'compare.users.apps.stores',
+    'compare.users.apps.datasource',
 ]
 # https://docs.djangoproject.com/en/dev/ref/settings/#installed-apps
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
