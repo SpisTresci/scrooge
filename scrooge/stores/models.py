@@ -70,7 +70,7 @@ class Store(models.Model):
         if not offers:
             return
 
-        field_names = Offer._meta.get_all_field_names()
+        field_names = [f.name for f in Offer._meta.get_fields()]
         for offer_dict in offers:
             data = {}
 
