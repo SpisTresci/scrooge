@@ -13,7 +13,9 @@ RUN apk update \
   # Translations dependencies
   && apk add gettext \
   # https://docs.djangoproject.com/en/dev/ref/django-admin/#dbshell
-  && apk add postgresql-client
+  && apk add postgresql-client \
+  # lxml dependencies
+  && apk add libxml2 libxslt-dev g++
 
 # Requirements are installed here to ensure they will be cached.
 COPY ./requirements /requirements
