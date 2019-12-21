@@ -1,5 +1,5 @@
 [MASTER]
-load-plugins=pylint_common, pylint_django, pylint_celery 
+load-plugins=pylint_django, pylint_celery 
 
 [FORMAT]
 max-line-length=120
@@ -9,3 +9,6 @@ disable=missing-docstring,invalid-name
 
 [DESIGN]
 max-parents=13
+
+[TYPECHECK]
+generated-members=REQUEST,acl_users,aq_parent,"[a-zA-Z]+_set{1,2}",save,delete

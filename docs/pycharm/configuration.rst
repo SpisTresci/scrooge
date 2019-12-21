@@ -14,24 +14,16 @@ This repository comes with already prepared "Run/Debug Configurations" for docke
 
 .. image:: images/2.png
 
-But as you can see, at the beggining there is something wrong with them. They have red X on django icon, and they cannot be used, withot configuring remote python interpteter. To do that, you have to go to *Settings > Build, Execution, Deployment* first.
+But as you can see, at the beginning there is something wrong with them. They have red X on django icon, and they cannot be used, without configuring remote python interpteter. To do that, you have to go to *Settings > Build, Execution, Deployment* first.
 
 
 Next, you have to add new remote python interpreter, based on already tested deployment settings. Go to *Settings > Project > Project Interpreter*. Click on the cog icon, and click *Add Remote*.
 
 .. image:: images/3.png
 
-Switch to *Docker Compose* and select `dev.yml` file from directory of your project, next set *Service name* to `django`
+Switch to *Docker Compose* and select `local.yml` file from directory of your project, next set *Service name* to `django`
 
 .. image:: images/4.png
-
-Because Pycharm restarts container every time you use Configuration Run, to not have server restarted during running tests, we defined second service in `dev.yml` file called pycharm. To use it, you have to add interpreter of second service as well.
-
-.. image:: images/5.png
-
-The final result should be:
-
-.. image:: images/6.png
 
 Having that, click *OK*. Close *Settings* panel, and wait few seconds...
 
@@ -48,7 +40,7 @@ After few seconds, all *Run/Debug Configurations* should be ready to use.
 * run and debug tests
 .. image:: images/f2.png
 .. image:: images/f3.png
-* run and debug migrations or different django managment commands
+* run and debug migrations or different django management commands
 .. image:: images/f4.png
 * and many others..
 
@@ -69,4 +61,4 @@ Most of the files from `.idea/` were added to `.gitignore` with a few exceptions
 
 In theory you can remove them from repository, but then, other people will lose a ability to initialize a project from provided configurations as you did. To get rid of this annoying state, you can run command::
 
-    $ git update-index --assume-unchanged spistresci.iml
+    $ git update-index --assume-unchanged compare.iml

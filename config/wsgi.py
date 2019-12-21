@@ -1,5 +1,5 @@
 """
-WSGI config for SpisTresci project.
+WSGI config for Scrooge project.
 
 This module contains the WSGI application used by Django's development server
 and any production WSGI deployments. It should expose a module-level variable
@@ -14,13 +14,16 @@ framework.
 
 """
 import os
-
+import sys
 
 from django.core.wsgi import get_wsgi_application
-from whitenoise.django import DjangoWhiteNoise
-if os.environ.get("DJANGO_SETTINGS_MODULE") == "config.settings.production":
-    from raven.contrib.django.raven_compat.middleware.wsgi import Sentry
 
+# This allows easy placement of apps within the interior
+# scrooge directory.
+app_path = os.path.abspath(
+    os.path.join(os.path.dirname(os.path.abspath(__file__)), os.pardir)
+)
+sys.path.append(os.path.join(app_path, "scrooge"))
 # We defer to a DJANGO_SETTINGS_MODULE already in the environment. This breaks
 # if running multiple sites in the same mod_wsgi process. To fix this, use
 # mod_wsgi daemon mode with each site in its own daemon process, or use
@@ -31,13 +34,6 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings.production")
 # file. This includes Django's development server, if the WSGI_APPLICATION
 # setting points here.
 application = get_wsgi_application()
-
-# Use Whitenoise to serve static files
-# See: https://whitenoise.readthedocs.org/
-application = DjangoWhiteNoise(application)
-if os.environ.get("DJANGO_SETTINGS_MODULE") == "config.settings.production":
-    application = Sentry(application)
-
 # Apply WSGI middleware here.
 # from helloworld.wsgi import HelloWorldApplication
 # application = HelloWorldApplication(application)

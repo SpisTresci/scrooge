@@ -1,60 +1,29 @@
-# Wheel 0.25+ needed to install certain packages on CPython 3.5+
-# like Pillow and psycopg2
-# See http://bitly.com/wheel-building-fails-CPython-35
-# Verified bug on Python 3.5.1
-wheel==0.29.0
+pytz==2019.3  # https://github.com/stub42/pytz
+python-slugify==4.0.0  # https://github.com/un33k/python-slugify
+Pillow==6.2.1  # https://github.com/python-pillow/Pillow
+rcssmin==1.0.6  # https://github.com/ndparker/rcssmin
+argon2-cffi==19.2.0  # https://github.com/hynek/argon2_cffi
+whitenoise==5.0.1  # https://github.com/evansd/whitenoise
+redis==3.3.11  # https://github.com/antirez/redis
+celery==4.4.0  # pyup: < 5.0  # https://github.com/celery/celery
+django-celery-beat==1.5.0  # https://github.com/celery/django-celery-beat
+flower==0.9.3  # https://github.com/mher/flower
+lxml==4.4.2  # https://github.com/lxml/lxml
+django-docopt-command==1.0.0
+PyYAML==5.2
+GitPython==3.0.5
+django-chroniker==1.0.16
 
-# Bleeding edge Django
-django==1.9.4
+# Django
+# ------------------------------------------------------------------------------
+django==2.2.9  # pyup: < 3.0  # https://www.djangoproject.com/
+django-environ==0.4.5  # https://github.com/joke2k/django-environ
+django-model-utils==4.0.0  # https://github.com/jazzband/django-model-utils
+django-allauth==0.41.0  # https://github.com/pennersr/django-allauth
+django-crispy-forms==1.8.1  # https://github.com/django-crispy-forms/django-crispy-forms
+django-compressor==2.3  # https://github.com/django-compressor/django-compressor
+django-redis==4.11.0  # https://github.com/niwinz/django-redis
 
-# Configuration
-django-environ==0.4.0
-django-secure==1.0.1
-whitenoise==2.0.6
-
-
-# Forms
-django-braces==1.8.1
-django-crispy-forms==1.6.0
-django-floppyforms==1.6.1
-
-# Models
-django-model-utils==2.4
-
-# Images
-Pillow==3.1.1
-
-# For user registration, either via email or social
-# Well-built with regular release cycles!
-django-allauth==0.24.1
-
-
-# Python-PostgreSQL Database Adapter
-psycopg2==2.6.1
-
-# Unicode slugification
-unicode-slugify==0.1.3
-django-autoslug==1.9.3
-
-# Time zones support
-pytz==2015.7
-
-# Redis support
-django-redis==4.3.0
-redis>=2.10.0
-
-
-celery==3.1.21
-
-
-# Your custom requirements go here
-django-docopt-command==0.2.2
-PyYAML==3.11
-GitPython==1.0.2
-lxml==3.6.0
-
-# django-chroniker==0.8.5
-# Because of issues:
-# https://github.com/chrisspen/django-chroniker/issues/59
-# Right now we are using custom version of django-chroniker
-git+git://github.com/SpisTresci/django-chroniker.git@st-dev-5
+# Django REST Framework
+djangorestframework==3.11.0  # https://github.com/encode/django-rest-framework
+coreapi==2.3.3  # https://github.com/core-api/python-client

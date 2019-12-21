@@ -1,49 +1,69 @@
-version: '2'
+version: '3'
 
 volumes:
-  postgres_data: {}
-  postgres_backup: {}
+  local_postgres_data: {}
+  local_postgres_data_backups: {}
 
 services:
-  postgres:
-    build: ./compose/postgres
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-      - postgres_backup:/backups
-    environment:
-      - POSTGRES_USER=spistresci
-
-  django:
+  django: &django
     build:
       context: .
-      dockerfile: ./compose/django/Dockerfile-dev
-    command: python /app/manage.py runserver_plus 0.0.0.0:8000
+      dockerfile: ./compose/local/django/Dockerfile
+    image: compare_local_django
     depends_on:
-      - postgres
-    environment:
-      - POSTGRES_USER=spistresci
-    volumes:
-      - .:/app
-    ports:
-      - "8000:8000"
-    links:
       - postgres
       - mailhog
-
-  pycharm:
-    build:
-      context: .
-      dockerfile: ./compose/django/Dockerfile-dev
-    depends_on:
-      - postgres
-    environment:
-      - POSTGRES_USER=spistresci
     volumes:
       - .:/app
-    links:
-      - postgres
+    env_file:
+      - ./.envs/.local/.django
+      - ./.envs/.local/.postgres
+    ports:
+      - "8000:8000"
+    command: /start
+
+  postgres:
+    build:
+      context: .
+      dockerfile: ./compose/production/postgres/Dockerfile
+    image: compare_production_postgres
+    volumes:
+      - local_postgres_data:/var/lib/postgresql/data
+      - local_postgres_data_backups:/backups
+    env_file:
+      - ./.envs/.local/.postgres
 
   mailhog:
-    image: mailhog/mailhog
+    image: mailhog/mailhog:v1.0.0
     ports:
       - "8025:8025"
+
+  redis:
+    image: redis:5.0
+
+  celeryworker:
+    <<: *django
+    image: compare_local_celeryworker
+    depends_on:
+      - redis
+      - postgres
+      - mailhog
+    ports: []
+    command: /start-celeryworker
+
+  celerybeat:
+    <<: *django
+    image: compare_local_celerybeat
+    depends_on:
+      - redis
+      - postgres
+      - mailhog
+    ports: []
+    command: /start-celerybeat
+
+  flower:
+    <<: *django
+    image: compare_local_flower
+    ports:
+      - "5555:5555"
+    command: /start-flower

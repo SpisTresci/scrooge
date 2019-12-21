@@ -13,10 +13,16 @@ indent_style = space
 indent_size = 4
 
 [*.py]
-line_length=120
-known_first_party=spistresci
-multi_line_output=3
-default_section=THIRDPARTY
+line_length = 120
+known_first_party = compare
+multi_line_output = 3
+default_section = THIRDPARTY
+recursive = true
+skip = venv/
+skip_glob = **/migrations/*.py
+include_trailing_comma = true
+force_grid_wrap = 0
+use_parentheses = true
 
 [*.{html,css,scss,json,yml}]
 indent_style = space
@@ -27,3 +33,7 @@ trim_trailing_whitespace = false
 
 [Makefile]
 indent_style = tab
+
+[nginx.conf]
+indent_style = space
+indent_size = 2
