@@ -40,7 +40,7 @@ master_doc = "index"
 
 # General information about the project.
 project = "Scrooge"
-copyright = """2019, Arkadiusz Strzelec"""
+copyright = """2019, Scrooge"""
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -184,7 +184,7 @@ latex_documents = [
         "index",
         "scrooge.tex",
         "Scrooge Documentation",
-        """Arkadiusz Strzelec""",
+        "Scrooge",
         "manual",
     )
 ]
@@ -219,7 +219,7 @@ man_pages = [
         "index",
         "scrooge",
         "Scrooge Documentation",
-        ["""Arkadiusz Strzelec"""],
+        ["Scrooge"],
         1,
     )
 ]
@@ -238,7 +238,7 @@ texinfo_documents = [
         "index",
         "scrooge",
         "Scrooge Documentation",
-        """Arkadiusz Strzelec""",
+        "Scrooge",
         "Scrooge",
         """Scrooge scrooge!""",
         "Miscellaneous",
