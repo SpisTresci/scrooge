@@ -107,7 +107,7 @@ class TestStore(TestCase):
             self.store.update_offers(revision_number=0, modified=offers)
 
         self.assertEqual(logger_cm.output, [
-            "WARNING:spistresci.stores.models:[Store:Foo][Offer:1]\n"
+            "WARNING:scrooge.stores.models:[Store:Foo][Offer:1]\n"
             "\t[price] 1.99 (<class 'decimal.Decimal'>) => 0.00 (<class 'decimal.Decimal'>)"
         ])
 

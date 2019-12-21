@@ -7,8 +7,8 @@ from scrooge.datasource.models import XmlDataSourceModel
 from scrooge.stores.models import Store
 
 
-@patch('spistresci.stores.management.commands.update_store_offers.Store.update')
-@patch('spistresci.stores.management.commands.update_store_offers.Store.fetch')
+@patch('scrooge.stores.management.commands.update_store_offers.Store.update')
+@patch('scrooge.stores.management.commands.update_store_offers.Store.fetch')
 class TestUpdateStoreProducts(TestCase):
 
     def setUp(self):
@@ -52,7 +52,7 @@ class TestUpdateStoreProducts(TestCase):
                 call_command('update_store_offers', 'Foo', not_existing_stores[0], 'Bar', not_existing_stores[1])
 
         self.assertEqual(logger_cm.output, [
-            "ERROR:spistresci.stores.management.commands.update_store_offers:"
+            "ERROR:scrooge.stores.management.commands.update_store_offers:"
             "[Store:{}] There is such store defined in database".format(name.lower()) for name in not_existing_stores
         ])
 
@@ -66,11 +66,11 @@ class TestUpdateStoreProducts(TestCase):
                 call_command('update_store_offers', 'Foo', 'Bar')
 
         self.assertIn(
-            "CRITICAL:spistresci.stores.management.commands.update_store_offers:[Store:Foo] Error1",
+            "CRITICAL:scrooge.stores.management.commands.update_store_offers:[Store:Foo] Error1",
             logger_cm.output[0]
         )
         self.assertIn(
-            "CRITICAL:spistresci.stores.management.commands.update_store_offers:[Store:Bar] 2nd Error",
+            "CRITICAL:scrooge.stores.management.commands.update_store_offers:[Store:Bar] 2nd Error",
             logger_cm.output[1]
         )
 
@@ -88,11 +88,11 @@ class TestUpdateStoreProducts(TestCase):
         self.assertEqual(update.call_count, 1)
 
         self.assertIn(
-            "CRITICAL:spistresci.stores.management.commands.update_store_offers:[Store:Foo] Error1",
+            "CRITICAL:scrooge.stores.management.commands.update_store_offers:[Store:Foo] Error1",
             logger_cm.output[0]
         )
         self.assertIn(
-            "CRITICAL:spistresci.stores.management.commands.update_store_offers:[Store:Bar] 2nd Error",
+            "CRITICAL:scrooge.stores.management.commands.update_store_offers:[Store:Bar] 2nd Error",
             logger_cm.output[1]
         )
 

@@ -26,7 +26,7 @@ class Store(models.Model):
         default=None,
         null=True
     )
-    data_source = models.ForeignKey(DataSourceModel)
+    data_source = models.ForeignKey(DataSourceModel, on_delete=models.PROTECT)
 
     def data_source_instance(self):
         return self.data_source.child.impl_class(self)

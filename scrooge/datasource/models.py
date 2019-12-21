@@ -135,7 +135,7 @@ def xpath_validator(value):
 
 
 class XmlDataField(models.Model):
-    name = models.ForeignKey(DataSourceFieldName, null=True)
+    name = models.ForeignKey(DataSourceFieldName, null=True, on_delete=models.PROTECT)
     xpath = models.CharField(
         default='',
         blank=True,
@@ -143,7 +143,7 @@ class XmlDataField(models.Model):
         max_length=256,
         validators=[xpath_validator]
     )
-    data_source = models.ForeignKey(XmlDataSourceModel)
+    data_source = models.ForeignKey(XmlDataSourceModel, on_delete=models.PROTECT)
 
     class Meta:
         unique_together = (("name", "data_source"),)

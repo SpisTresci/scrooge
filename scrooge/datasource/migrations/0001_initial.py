@@ -4,7 +4,7 @@ from __future__ import unicode_literals
 
 from django.db import migrations, models
 import django.db.models.deletion
-import spistresci.datasource.models
+import scrooge.datasource.models
 
 
 class Migration(migrations.Migration):
@@ -27,7 +27,7 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('name', models.CharField(max_length=32)),
-                ('xpath', models.CharField(blank=True, default='', help_text='Relative xpath needed to extract value of field', max_length=256, validators=[spistresci.datasource.models.xpath_validator])),
+                ('xpath', models.CharField(blank=True, default='', help_text='Relative xpath needed to extract value of field', max_length=256, validators=[scrooge.datasource.models.xpath_validator])),
             ],
         ),
         migrations.CreateModel(
