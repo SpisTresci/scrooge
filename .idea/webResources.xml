@@ -5,7 +5,7 @@
       <entry url="file://$PROJECT_DIR$">
         <entryData>
           <resourceRoots>
-            <path value="file://$PROJECT_DIR$/compare/static" />
+            <path value="file://$PROJECT_DIR$/scrooge/static" />
           </resourceRoots>
         </entryData>
       </entry>

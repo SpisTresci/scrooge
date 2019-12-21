@@ -13,9 +13,9 @@
     </facet>
   </component>
   <component name="NewModuleRootManager">
-     
-    <content url="file://$MODULE_DIR$" /> 
-    
+
+    <content url="file://$MODULE_DIR$" />
+
     <orderEntry type="sourceFolder" forTests="false" />
   </component>
   <component name="PackageRequirementsSettings">
@@ -32,7 +32,7 @@
     <option name="TEMPLATE_CONFIGURATION" value="Django" />
     <option name="TEMPLATE_FOLDERS">
       <list>
-        <option value="$MODULE_DIR$/compare/templates" />
+        <option value="$MODULE_DIR$/scrooge/templates" />
       </list>
     </option>
   </component>

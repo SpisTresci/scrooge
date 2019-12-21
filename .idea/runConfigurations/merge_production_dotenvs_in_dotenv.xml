@@ -1,6 +1,6 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="merge_production_dotenvs_in_dotenv" type="PythonConfigurationType" factoryName="Python" singleton="true">
-    <module name="compare" />
+    <module name="scrooge" />
     <option name="INTERPRETER_OPTIONS" value="" />
     <option name="PARENT_ENVS" value="true" />
     <envs>
