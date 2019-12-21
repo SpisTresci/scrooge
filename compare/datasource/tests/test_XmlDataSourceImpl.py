@@ -2,10 +2,10 @@ from unittest.mock import patch, Mock, MagicMock, call
 
 from test_plus.test import TestCase
 
-from spistresci.datasource.generic import XmlDataSourceImpl
-from spistresci.datasource.models import XmlDataSourceModel, XmlDataField, DataSourceFieldName
-from spistresci.stores.models import Store
-from spistresci.stores.utils.datastoragemanager import DataStorageManager
+from compare.datasource.generic import XmlDataSourceImpl
+from compare.datasource.models import XmlDataSourceModel, XmlDataField, DataSourceFieldName
+from compare.stores.models import Store
+from compare.stores.utils.datastoragemanager import DataStorageManager
 
 
 class TestXmlDataSourceImpl(TestCase):

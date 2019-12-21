@@ -2,7 +2,7 @@ import logging
 import traceback
 from django.core.management.base import BaseCommand
 
-from spistresci.stores.models import Store
+from compare.stores.models import Store
 
 logger = logging.getLogger(__name__)
 

@@ -4,8 +4,8 @@ from django.db.utils import ProgrammingError
 from django.forms import ValidationError
 from django.forms.models import BaseInlineFormSet
 
-from spistresci.datasource.models import XmlDataSourceModel, XmlDataField, DataSourceFieldName
-from spistresci.offers.models import Offer
+from compare.datasource.models import XmlDataSourceModel, XmlDataField, DataSourceFieldName
+from compare.offers.models import Offer
 
 logger = logging.getLogger(__name__)
 

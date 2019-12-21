@@ -4,7 +4,7 @@ from test_plus.test import TestCase
 
 from django.test.utils import override_settings
 
-from spistresci.stores.utils.datastoragemanager import DataStorageManager
+from compare.stores.utils.datastoragemanager import DataStorageManager
 
 
 class TestDataStorageManager(TestCase):

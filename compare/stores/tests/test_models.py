@@ -2,9 +2,9 @@ from decimal import Decimal
 from django.db.utils import IntegrityError
 from test_plus.test import TestCase
 
-from spistresci.datasource.models import XmlDataSourceModel
-from spistresci.offers.models import Offer
-from spistresci.stores.models import Store
+from compare.datasource.models import XmlDataSourceModel
+from compare.offers.models import Offer
+from compare.stores.models import Store
 
 
 class TestStore(TestCase):

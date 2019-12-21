@@ -1,4 +1,4 @@
-from spistresci.datasource.generic import XmlDataSourceImpl
+from compare.datasource.generic import XmlDataSourceImpl
 
 
 class Publio(XmlDataSourceImpl):

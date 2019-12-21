@@ -6,13 +6,13 @@ from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 
-from spistresci.datasource.generic import XmlDataSourceImpl
-from spistresci.datasource.utils import get_data_source_classes
+from compare.datasource.generic import XmlDataSourceImpl
+from compare.datasource.utils import get_data_source_classes
 
 # noinspection PyUnresolvedReferences
 # statement used for autodiscover,
 # TODO: replace with http://stackoverflow.com/questions/32335967/
-from spistresci.datasource.specific import *
+from compare.datasource.specific import *
 
 
 class DataSourceModel(models.Model):

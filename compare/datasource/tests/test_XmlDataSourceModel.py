@@ -1,6 +1,6 @@
 from test_plus.test import TestCase
 
-from spistresci.datasource.models import XmlDataSourceModel, XmlDataField, DataSourceFieldName
+from compare.datasource.models import XmlDataSourceModel, XmlDataField, DataSourceFieldName
 
 
 class TestXmlDataSourceModel(TestCase):

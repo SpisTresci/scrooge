@@ -1,8 +1,8 @@
 from django.contrib import admin
 from django.contrib.humanize.templatetags.humanize import naturaltime
 
-from spistresci.offers.models import Offer
-from spistresci.stores.models import Store
+from compare.offers.models import Offer
+from compare.stores.models import Store
 
 
 def get_enabled(obj):

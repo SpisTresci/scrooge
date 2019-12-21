@@ -1,4 +1,4 @@
-from spistresci.datasource.generic import DataSourceImpl
+from compare.datasource.generic import DataSourceImpl
 
 
 def get_data_source_classes():
