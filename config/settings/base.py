@@ -70,15 +70,16 @@ THIRD_PARTY_APPS = [
     "allauth.socialaccount",
     "rest_framework",
     "django_celery_beat",
+    'chroniker',  # cron in django-admin
 ]
 
 LOCAL_APPS = [
     "scrooge.users.apps.UsersConfig",
     # Your stuff: custom apps go here
     'scrooge.offers',
-    # 'scrooge.users.apps.products',
+    'scrooge.products',
     'scrooge.stores',
-    # 'scrooge.users.apps.datasource',
+    'scrooge.datasource',
 ]
 # https://docs.djangoproject.com/en/dev/ref/settings/#installed-apps
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
