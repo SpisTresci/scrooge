@@ -152,7 +152,7 @@ class Store(models.Model):
             for key in set(list(offer_db.to_dict().keys()) + list(offer_dict.keys())):
 
                 if key in core_fields:
-                    default_value = Offer._meta.get_field_by_name(key)[0].default
+                    default_value = next(f for f in Offer._meta.get_fields() if f.name==key).default
                     if key not in offer_dict:
                         changes.add(key, '<no_value>', default_value, db_value_type='<no_type>')
                         setattr(offer_db, key, default_value)
