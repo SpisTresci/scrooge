@@ -298,3 +298,4 @@ INSTALLED_APPS += ["compressor"]
 STATICFILES_FINDERS += ["compressor.finders.CompressorFinder"]
 # Your stuff...
 # ------------------------------------------------------------------------------
+ST_STORES_DATA_DIR = env("ST_STORES_DATA_DIR", default=ROOT_DIR('data'))
