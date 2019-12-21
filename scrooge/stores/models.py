@@ -130,7 +130,7 @@ class Store(models.Model):
                     )
 
                 if self.changes__warn:
-                    logger.warn(
+                    logger.warning(
                         '[Store:{}][Offer:{}]\n\t'
                         '{}'.format(self.store_name, self.offer_id, '\n\t'.join(self.changes__warn))
                     )
