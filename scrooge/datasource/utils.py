@@ -1,4 +1,4 @@
-from compare.datasource.generic import DataSourceImpl
+from scrooge.datasource.generic import DataSourceImpl
 
 
 def get_data_source_classes():

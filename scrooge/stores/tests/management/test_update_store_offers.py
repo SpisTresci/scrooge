@@ -3,8 +3,8 @@ from test_plus.test import TestCase
 
 from django.core.management import call_command
 
-from compare.datasource.models import XmlDataSourceModel
-from compare.stores.models import Store
+from scrooge.datasource.models import XmlDataSourceModel
+from scrooge.stores.models import Store
 
 
 @patch('spistresci.stores.management.commands.update_store_offers.Store.update')

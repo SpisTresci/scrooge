@@ -6,8 +6,8 @@ import environ
 
 ROOT_DIR = (
     environ.Path(__file__) - 3
-)  # (compare/config/settings/base.py - 3 = compare/)
-APPS_DIR = ROOT_DIR.path("compare")
+)  # (scrooge/config/settings/base.py - 3 = scrooge/)
+APPS_DIR = ROOT_DIR.path("scrooge")
 
 env = environ.Env()
 
@@ -73,12 +73,12 @@ THIRD_PARTY_APPS = [
 ]
 
 LOCAL_APPS = [
-    "compare.users.apps.UsersConfig",
+    "scrooge.users.apps.UsersConfig",
     # Your stuff: custom apps go here
-    'compare.offers',
-    # 'compare.users.apps.products',
-    'compare.stores',
-    # 'compare.users.apps.datasource',
+    'scrooge.offers',
+    # 'scrooge.users.apps.products',
+    'scrooge.stores',
+    # 'scrooge.users.apps.datasource',
 ]
 # https://docs.djangoproject.com/en/dev/ref/settings/#installed-apps
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
@@ -86,7 +86,7 @@ INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
 # MIGRATIONS
 # ------------------------------------------------------------------------------
 # https://docs.djangoproject.com/en/dev/ref/settings/#migration-modules
-MIGRATION_MODULES = {"sites": "compare.contrib.sites.migrations"}
+MIGRATION_MODULES = {"sites": "scrooge.contrib.sites.migrations"}
 
 # AUTHENTICATION
 # ------------------------------------------------------------------------------
@@ -184,7 +184,7 @@ TEMPLATES = [
                 "django.template.context_processors.static",
                 "django.template.context_processors.tz",
                 "django.contrib.messages.context_processors.messages",
-                "compare.utils.context_processors.settings_context",
+                "scrooge.utils.context_processors.settings_context",
             ],
         },
     }
@@ -283,9 +283,9 @@ ACCOUNT_EMAIL_REQUIRED = True
 # https://django-allauth.readthedocs.io/en/latest/configuration.html
 ACCOUNT_EMAIL_VERIFICATION = "mandatory"
 # https://django-allauth.readthedocs.io/en/latest/configuration.html
-ACCOUNT_ADAPTER = "compare.users.adapters.AccountAdapter"
+ACCOUNT_ADAPTER = "scrooge.users.adapters.AccountAdapter"
 # https://django-allauth.readthedocs.io/en/latest/configuration.html
-SOCIALACCOUNT_ADAPTER = "compare.users.adapters.SocialAccountAdapter"
+SOCIALACCOUNT_ADAPTER = "scrooge.users.adapters.SocialAccountAdapter"
 
 # django-compressor
 # ------------------------------------------------------------------------------

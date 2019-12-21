@@ -1,6 +1,6 @@
 from test_plus.test import TestCase
 
-from compare.datasource.models import XmlDataSourceModel, XmlDataField, DataSourceFieldName
+from scrooge.datasource.models import XmlDataSourceModel, XmlDataField, DataSourceFieldName
 
 
 class TestXmlDataSourceModel(TestCase):

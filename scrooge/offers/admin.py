@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.core.urlresolvers import reverse
 
-from compare.offers.models import Offer
+from scrooge.offers.models import Offer
 
 
 def get_url(obj):

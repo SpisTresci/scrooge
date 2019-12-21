@@ -2,7 +2,7 @@ import logging
 from lxml import etree
 from urllib.request import urlopen, Request
 
-from compare.stores.utils.datastoragemanager import DataStorageManager
+from scrooge.stores.utils.datastoragemanager import DataStorageManager
 
 logger = logging.getLogger(__name__)
 

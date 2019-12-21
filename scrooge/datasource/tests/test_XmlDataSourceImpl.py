@@ -2,10 +2,10 @@ from unittest.mock import patch, Mock, MagicMock, call
 
 from test_plus.test import TestCase
 
-from compare.datasource.generic import XmlDataSourceImpl
-from compare.datasource.models import XmlDataSourceModel, XmlDataField, DataSourceFieldName
-from compare.stores.models import Store
-from compare.stores.utils.datastoragemanager import DataStorageManager
+from scrooge.datasource.generic import XmlDataSourceImpl
+from scrooge.datasource.models import XmlDataSourceModel, XmlDataField, DataSourceFieldName
+from scrooge.stores.models import Store
+from scrooge.stores.utils.datastoragemanager import DataStorageManager
 
 
 class TestXmlDataSourceImpl(TestCase):

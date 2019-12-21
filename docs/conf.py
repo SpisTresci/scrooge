@@ -163,7 +163,7 @@ html_static_path = ["_static"]
 # html_file_suffix = None
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = "comparedoc"
+htmlhelp_basename = "scroogedoc"
 
 
 # -- Options for LaTeX output --------------------------------------------------
@@ -182,7 +182,7 @@ latex_elements = {
 latex_documents = [
     (
         "index",
-        "compare.tex",
+        "scrooge.tex",
         "Scrooge Documentation",
         """Arkadiusz Strzelec""",
         "manual",
@@ -217,7 +217,7 @@ latex_documents = [
 man_pages = [
     (
         "index",
-        "compare",
+        "scrooge",
         "Scrooge Documentation",
         ["""Arkadiusz Strzelec"""],
         1,
@@ -236,11 +236,11 @@ man_pages = [
 texinfo_documents = [
     (
         "index",
-        "compare",
+        "scrooge",
         "Scrooge Documentation",
         """Arkadiusz Strzelec""",
         "Scrooge",
-        """Scrooge compare!""",
+        """Scrooge scrooge!""",
         "Miscellaneous",
     )
 ]

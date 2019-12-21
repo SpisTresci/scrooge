@@ -2,7 +2,7 @@ import logging
 import traceback
 from django.core.management.base import BaseCommand
 
-from compare.stores.models import Store
+from scrooge.stores.models import Store
 
 logger = logging.getLogger(__name__)
 

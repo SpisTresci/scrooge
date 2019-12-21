@@ -1,2 +1,2 @@
-from compare.datasource.specific.publio import Publio
-from compare.datasource.specific.woblink import Woblink
+from scrooge.datasource.specific.publio import Publio
+from scrooge.datasource.specific.woblink import Woblink

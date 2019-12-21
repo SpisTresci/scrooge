@@ -1,7 +1,7 @@
 import pytest
 
-from compare.users.forms import UserCreationForm
-from compare.users.tests.factories import UserFactory
+from scrooge.users.forms import UserCreationForm
+from scrooge.users.tests.factories import UserFactory
 
 pytestmark = pytest.mark.django_db
 

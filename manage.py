@@ -23,8 +23,8 @@ if __name__ == "__main__":
         raise
 
     # This allows easy placement of apps within the interior
-    # compare directory.
+    # scrooge directory.
     current_path = os.path.dirname(os.path.abspath(__file__))
-    sys.path.append(os.path.join(current_path, "compare"))
+    sys.path.append(os.path.join(current_path, "scrooge"))
 
     execute_from_command_line(sys.argv)

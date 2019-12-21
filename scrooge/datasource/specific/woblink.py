@@ -1,4 +1,4 @@
-from compare.datasource.generic import XmlDataSourceImpl
+from scrooge.datasource.generic import XmlDataSourceImpl
 
 
 class Woblink(XmlDataSourceImpl):

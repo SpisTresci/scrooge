@@ -6,13 +6,13 @@ from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 
-from compare.datasource.generic import XmlDataSourceImpl
-from compare.datasource.utils import get_data_source_classes
+from scrooge.datasource.generic import XmlDataSourceImpl
+from scrooge.datasource.utils import get_data_source_classes
 
 # noinspection PyUnresolvedReferences
 # statement used for autodiscover,
 # TODO: replace with http://stackoverflow.com/questions/32335967/
-from compare.datasource.specific import *
+from scrooge.datasource.specific import *
 
 
 class DataSourceModel(models.Model):

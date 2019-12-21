@@ -4,8 +4,8 @@ from datetime import datetime
 from django.db import models, transaction
 from django.utils.translation import ugettext_lazy as _
 
-from compare.offers.models import Offer
-from compare.datasource.models import DataSourceModel
+from scrooge.offers.models import Offer
+from scrooge.datasource.models import DataSourceModel
 
 
 logger = logging.getLogger(__name__)

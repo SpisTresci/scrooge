@@ -4,8 +4,8 @@ from django.db.utils import ProgrammingError
 from django.forms import ValidationError
 from django.forms.models import BaseInlineFormSet
 
-from compare.datasource.models import XmlDataSourceModel, XmlDataField, DataSourceFieldName
-from compare.offers.models import Offer
+from scrooge.datasource.models import XmlDataSourceModel, XmlDataField, DataSourceFieldName
+from scrooge.offers.models import Offer
 
 logger = logging.getLogger(__name__)
 
